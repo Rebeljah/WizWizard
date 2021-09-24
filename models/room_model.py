@@ -1,16 +1,11 @@
-
-# typing
-from light_model import Light, Group
-Lights = list[Light]
-LightGroups = list[Group]
+from models.light_model import Light
 
 
 class Room:
     def __init__(self, room_name: str, room_id: str):
         self._id = room_id  # read only
         self.name = room_name
-        self.lights: Lights = []
-        self.groups: LightGroups = []
+        self.lights: list[Light] = []
 
     @property
     def id(self) -> str:
@@ -19,6 +14,3 @@ class Room:
 
     def add_light(self, light: Light) -> None:
         self.lights.append(light)
-
-    def add_group(self, group: Group) -> None:
-        self.groups.append(group)

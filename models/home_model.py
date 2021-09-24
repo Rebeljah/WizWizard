@@ -1,20 +1,24 @@
+import pywizlight as pwz
 
 import os
-import json
+import asyncio as aio
 
-from room_model import Room
-from light_model import Light, Group
-import utils
+from models.room_model import Room
+from models.light_model import Light
+from utils import utils
 
+# typing
 from typing import Iterator
 Rooms = list[Room]
+Lights = list[Light]
 
 
 class Home:
     def __init__(self, home_name: str, home_id: str):
-        self._id = home_id  # read only
+        self._id = home_id  # read only, use id property
         self.name = home_name
         self.rooms: Rooms = []
+        self.unassigned_lights: Lights = []  # lights not added to home
 
     @property
     def id(self) -> str:
@@ -43,26 +47,25 @@ class Home:
                             "lights": [
                                 {
                                     "name": light.name,
-                                    "ip": light.ip
+                                    "mac": light.mac
                                 } for light in room.lights
-                            ],
-                            "groups": [
-                                {
-                                    "name": group.name,
-                                    "ips": group.ips
-                                } for group in room.groups
                             ]
                         } for room in self.rooms
                     ]
                 }
-        filepath = os.path.join('', 'homes', f"{self.id}.json")
+
+        filepath = os.path.join('save_data', f"{self.id}.json")
         utils.save_json(data, filepath, indent=4)
 
     @classmethod
     def from_save(cls, home_id: str):
         """Load then parse home_model data from JSON and return a Home instance"""
-        filepath = os.path.join('', 'homes', f"{home_id}.json")
+
+        filepath = os.path.join('save_data', f"{home_id}.json")
         home_info = utils.load_json(filepath)
+
+        # get available bulbs from LAN
+        available_bulbs: list = utils.discover_bulbs()
 
         # create Home
         home = Home(home_info['name'], home_info['id'])
@@ -75,16 +78,17 @@ class Home:
 
             # add Lights to Room
             for light_info in room_info['lights']:
-                light = Light(light_info['name'], light_info['ip'])
+                light = Light(light_info['name'], light_info['mac'])
+                for bulb in available_bulbs:
+                    if bulb.mac == light.mac:
+                        available_bulbs.remove(bulb)
+                        light.set_bulb(bulb)
                 room.add_light(light)
 
-            # add Groups using the loaded lights
-            for group_info in room_info['groups']:
-                # add Group to Home
-                group = Group(group_info['name'])
-                room.add_group(group)
-                # add lights to group
-                for ip in group_info['ips']:
-                    light = utils.find_light(home.lights, ip)
-                    group.add_light(light)
+        # add any remaining available bulbs as unassigned lights to the home
+        for bulb in available_bulbs:
+            light = Light(name='', mac=bulb.mac)
+            light.set_bulb(bulb)
+            home.unassigned_lights.append(light)
+
         return home
