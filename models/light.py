@@ -2,7 +2,9 @@
 Module to contain code for lights and light groups for controlling lights in rooms
 """
 import pywizlight as pwz
-from typing import Iterable
+from pywizlight import PilotBuilder, PilotParser
+
+import asyncio as aio
 
 Bulb = pwz.wizlight
 
@@ -23,3 +25,9 @@ class Light:
     def set_bulb(self, bulb: Bulb) -> None:
         self.bulb = bulb
         self.available = True
+
+    def toggle(self) -> None:
+        aio.run(self.bulb.lightSwitch())
+
+    def set_brightness(self, brightness: int):  # 0-255
+        aio.run(self.bulb.turn_on(PilotBuilder(brightness=brightness)))
