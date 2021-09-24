@@ -1,4 +1,4 @@
-from models.light_model import Light
+from models.light import Light
 
 
 class Room:

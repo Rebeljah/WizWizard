@@ -1,10 +1,8 @@
-import pywizlight as pwz
 
 import os
-import asyncio as aio
 
-from models.room_model import Room
-from models.light_model import Light
+from models.room import Room
+from models.light import Light
 from utils import utils
 
 # typing
@@ -63,7 +61,6 @@ class Home:
 
         filepath = os.path.join('save_data', f"{home_id}.json")
         home_info = utils.load_json(filepath)
-
         # get available bulbs from LAN
         available_bulbs: list = utils.discover_bulbs()
 
@@ -79,15 +76,18 @@ class Home:
             # add Lights to Room
             for light_info in room_info['lights']:
                 light = Light(light_info['name'], light_info['mac'])
+                room.add_light(light)
+
+                # assign a bulb from LAN to light
                 for bulb in available_bulbs:
                     if bulb.mac == light.mac:
                         available_bulbs.remove(bulb)
                         light.set_bulb(bulb)
-                room.add_light(light)
+                        break
 
         # add any remaining available bulbs as unassigned lights to the home
-        for bulb in available_bulbs:
-            light = Light(name='', mac=bulb.mac)
+        for i, bulb in enumerate(available_bulbs, 1):
+            light = Light(name=f"Unassigned {i}", mac=bulb.mac)
             light.set_bulb(bulb)
             home.unassigned_lights.append(light)
 

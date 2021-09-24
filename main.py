@@ -1,2 +1,6 @@
+from ui.ui import WizWizardApp
+
+
 if __name__ == '__main__':
-    pass
+    app = WizWizardApp()
+    app.run()
