@@ -22,12 +22,23 @@ class Light:
     def mac(self) -> str:
         return self._mac
 
+    @property
+    def brightness(self) -> int:
+        """return current brightness 0-255"""
+        if self.bulb:
+            state: PilotParser = aio.run(self.bulb.updateState())
+            return state.get_brightness()
+
     def set_bulb(self, bulb: Bulb) -> None:
+        """attack a bulb to this light, the MAC address must match"""
+        assert bulb.mac == self.mac
         self.bulb = bulb
         self.available = True
 
     def toggle(self) -> None:
+        """acts like a lightswitch"""
         aio.run(self.bulb.lightSwitch())
 
-    def set_brightness(self, brightness: int):  # 0-255
+    def set_brightness(self, brightness: int) -> None:
+        """Set bulb brightness from 0-255"""
         aio.run(self.bulb.turn_on(PilotBuilder(brightness=brightness)))

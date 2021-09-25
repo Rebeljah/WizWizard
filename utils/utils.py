@@ -1,5 +1,8 @@
 import pywizlight as pwz
 
+from kivy.app import App
+from kivy.uix.widget import Widget
+
 import asyncio as aio
 import json
 import os
@@ -22,3 +25,8 @@ def save_json(data: dict, filepath, indent: int = 4) -> None:
 def load_json(filepath: str) -> dict:
     with open(filepath) as infile:
         return json.load(infile)
+
+
+def get_app_and_root() -> tuple[App, Widget]:
+    app = App.get_running_app()
+    return app, app.root

@@ -1,4 +1,4 @@
-from ui.app import WizWizardApp
+from ui.root import WizWizardApp
 from models.home import Home
 
 

@@ -1,13 +1,15 @@
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 
+from utils.utils import get_app_and_root
 
 
 class NavbarGrid(GridLayout):
-    def __init__(self, root, **kwargs):
-        assert root.parent is None
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        root.add_widget(self)
+
+        self.app, self.root = get_app_and_root()
+        self.root.add_widget(self)
 
         self.cols = 4
         self.rows = 1
@@ -17,8 +19,6 @@ class NavbarGrid(GridLayout):
         self.build()
 
     def build(self):
-        root = self.parent
-
         btn = Button(text='toggle all')
         self.add_widget(btn)
         btn = Button(text='theme all')
