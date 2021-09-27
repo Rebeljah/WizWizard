@@ -16,7 +16,10 @@ class Light:
         self._mac = mac  # read only, use mac property
 
         self.bulb: Bulb = None  # light will be unavailable if MAC not found on LAN
-        self.available = False  #
+        self.connected = False  #
+
+    def __hash__(self):
+        return hash(self.mac)
 
     @property
     def mac(self) -> str:
@@ -30,10 +33,10 @@ class Light:
             return state.get_brightness()
 
     def set_bulb(self, bulb: Bulb) -> None:
-        """attack a bulb to this light, the MAC address must match"""
+        """attach a bulb to this light, the MAC address must match"""
         assert bulb.mac == self.mac
         self.bulb = bulb
-        self.available = True
+        self.connected = True
 
     def toggle(self) -> None:
         """acts like a lightswitch"""

@@ -2,20 +2,23 @@ from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
 
 from models.home import Home
-from ui.lights import LightPageManager
-from ui.rooms import RoomGrid
-from ui.navbar import NavbarGrid
+from ui.room_controls import RoomControlPageManager
+from ui.room_navbar import RoomNavbar
 
 
 class RootGrid(GridLayout):
-    def __init__(self, app, **kwargs):
+    def __init__(self, app: App, **kwargs):
         super().__init__(**kwargs)
         app.root = self
 
+        # formatting
         self.rows = 3
-        self.room_grid = RoomGrid()
-        self.light_pages = LightPageManager()
-        self.navbar_grid = NavbarGrid()
+
+        # add children
+        self.room_navbar = RoomNavbar()
+        self.room_controls = RoomControlPageManager()
+        self.add_widget(self.room_navbar)
+        self.add_widget(self.room_controls)
 
 
 class WizWizardApp(App):

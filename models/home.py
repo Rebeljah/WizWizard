@@ -6,15 +6,24 @@ from models.light import Light
 from utils import utils
 
 # typing
-from typing import Iterator
+from typing import Iterator, Optional
 Rooms = list[Room]
 Lights = list[Light]
 
 
 class Home:
-    def __init__(self, home_name: str, home_id: str):
-        self._id = home_id  # read only, use id property
+    """
+    Represents the root node of the home tree. The Home contain rooms, and rooms
+    contains lights.
+
+    :param home_name: The user-visible name of the home
+    :param home_id: Unique home-id; created randomly if not passed
+    """
+    def __init__(self, home_name: str, home_id: Optional[str] = ''):
+
+        self._id = home_id if home_id else utils.create_home_id(7)
         self.name = home_name
+
         self.rooms: Rooms = []
         self.unassigned_lights: Lights = []  # lights not added to home
 
@@ -61,7 +70,7 @@ class Home:
 
         filepath = os.path.join('save_data', f"{home_id}.json")
         home_info = utils.load_json(filepath)
-        # get available bulbs from LAN
+        # get connected bulbs from LAN
         available_bulbs: list = utils.discover_bulbs()
 
         # create Home
@@ -85,7 +94,7 @@ class Home:
                         light.set_bulb(bulb)
                         break
 
-        # add any remaining available bulbs as unassigned lights to the home
+        # add any remaining connected bulbs as unassigned lights to the home
         for i, bulb in enumerate(available_bulbs, 1):
             light = Light(name=f"Unassigned {i}", mac=bulb.mac)
             light.set_bulb(bulb)

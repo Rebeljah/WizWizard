@@ -6,6 +6,7 @@ from kivy.uix.widget import Widget
 import asyncio as aio
 import json
 import os
+import random
 
 
 def discover_bulbs():
@@ -30,3 +31,9 @@ def load_json(filepath: str) -> dict:
 def get_app_and_root() -> tuple[App, Widget]:
     app = App.get_running_app()
     return app, app.root
+
+
+def create_home_id(length: int) -> str:
+    """Return a string to be used when creating a new home"""
+    r = random
+    return ''.join(str(r.randint(0, 9)) for _ in range(length))
