@@ -32,10 +32,15 @@ class Light:
             state: PilotParser = aio.run(self.bulb.updateState())
             return state.get_brightness()
 
+    @property
+    def is_on(self) -> bool:
+        """Check if the light is turned on"""
+        return self.bulb.status
+
     def set_bulb(self, bulb: Bulb) -> None:
         """attach a bulb to this light, the MAC address must match"""
-        assert bulb.mac == self.mac
         self.bulb = bulb
+        aio.run(self.bulb.updateState())
         self.connected = True
 
     def toggle(self) -> None:
@@ -44,4 +49,7 @@ class Light:
 
     def set_brightness(self, brightness: int) -> None:
         """Set bulb brightness from 0-255"""
-        aio.run(self.bulb.turn_on(PilotBuilder(brightness=brightness)))
+        if 0 <= brightness <= 255:
+            aio.run(self.bulb.turn_on(PilotBuilder(brightness=brightness)))
+        else:
+            raise ValueError(f"brightness ({brightness} not in range 0-255)")

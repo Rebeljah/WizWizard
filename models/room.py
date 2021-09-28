@@ -2,8 +2,15 @@ from models.light import Light
 
 
 class Room:
-    def __init__(self, room_name: str, room_id: str):
+    room_types = (
+        'attic', 'balcony', 'bar', 'basement', 'bathroom', 'bedroom', 'corridor',
+        'dining', 'dressing', 'entrance', 'garage', 'garden', "kid's room",
+        'kitchen', 'living room', 'office', 'playroom', 'terrace', 'tv'
+    )
+
+    def __init__(self, room_name: str, room_type: str, room_id: str):
         self._id = room_id  # read only
+        self.type: str = room_type
         self.name = room_name
         self.lights: list[Light] = []
 

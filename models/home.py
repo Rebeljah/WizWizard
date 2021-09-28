@@ -21,7 +21,7 @@ class Home:
     """
     def __init__(self, home_name: str, home_id: Optional[str] = ''):
 
-        self._id = home_id if home_id else utils.create_home_id(7)
+        self._id = home_id if home_id else utils.create_uid(7)
         self.name = home_name
 
         self.rooms: Rooms = []
@@ -50,6 +50,7 @@ class Home:
                     "rooms": [
                         {
                             "name": room.name,
+                            "type": room.type,
                             "id": room.id,
                             "lights": [
                                 {
@@ -79,7 +80,7 @@ class Home:
         # add Rooms and Lights to Home
         for room_info in home_info['rooms']:
             # create Room
-            room = Room(room_info['name'], room_info['id'])
+            room = Room(room_info['name'], room_info['type'], room_info['id'])
             home.add_room(room)
 
             # add Lights to Room
