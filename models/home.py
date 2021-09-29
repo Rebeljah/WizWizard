@@ -1,22 +1,29 @@
-import pywizlight as pwz
 
 import os
-import asyncio as aio
 
-from models.room_model import Room
-from models.light_model import Light
+from models.room import Room
+from models.light import Light
 from utils import utils
 
 # typing
-from typing import Iterator
+from typing import Iterator, Optional
 Rooms = list[Room]
 Lights = list[Light]
 
 
 class Home:
-    def __init__(self, home_name: str, home_id: str):
-        self._id = home_id  # read only, use id property
+    """
+    Represents the root node of the home tree. The Home contain rooms, and rooms
+    contains lights.
+
+    :param home_name: The user-visible name of the home
+    :param home_id: Unique home-id; created randomly if not passed
+    """
+    def __init__(self, home_name: str, home_id: Optional[str] = ''):
+
+        self._id = home_id if home_id else utils.create_uid(7)
         self.name = home_name
+
         self.rooms: Rooms = []
         self.unassigned_lights: Lights = []  # lights not added to home
 
@@ -43,6 +50,7 @@ class Home:
                     "rooms": [
                         {
                             "name": room.name,
+                            "type": room.type,
                             "id": room.id,
                             "lights": [
                                 {
@@ -63,8 +71,7 @@ class Home:
 
         filepath = os.path.join('save_data', f"{home_id}.json")
         home_info = utils.load_json(filepath)
-
-        # get available bulbs from LAN
+        # get connected bulbs from LAN
         available_bulbs: list = utils.discover_bulbs()
 
         # create Home
@@ -73,21 +80,24 @@ class Home:
         # add Rooms and Lights to Home
         for room_info in home_info['rooms']:
             # create Room
-            room = Room(room_info['name'], room_info['id'])
+            room = Room(room_info['name'], room_info['type'], room_info['id'])
             home.add_room(room)
 
             # add Lights to Room
             for light_info in room_info['lights']:
                 light = Light(light_info['name'], light_info['mac'])
+                room.add_light(light)
+
+                # assign a bulb from LAN to light
                 for bulb in available_bulbs:
                     if bulb.mac == light.mac:
                         available_bulbs.remove(bulb)
                         light.set_bulb(bulb)
-                room.add_light(light)
+                        break
 
-        # add any remaining available bulbs as unassigned lights to the home
-        for bulb in available_bulbs:
-            light = Light(name='', mac=bulb.mac)
+        # add any remaining connected bulbs as unassigned lights to the home
+        for i, bulb in enumerate(available_bulbs, 1):
+            light = Light(name=f"Unassigned {i}", mac=bulb.mac)
             light.set_bulb(bulb)
             home.unassigned_lights.append(light)
 
