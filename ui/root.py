@@ -18,7 +18,7 @@ class WizWizardApp(App):
 
         # form for adding new rooms
         self.add_room_form = AddRoomView()
-        # form for assigning lights to a room
+        # form for assigning lights to a selected_room
         self.assign_light_form = AssignLightView()
 
         # overall GridLayout
@@ -28,7 +28,7 @@ class WizWizardApp(App):
         self.nav_bar = NavBar()
         self.root.add_widget(self.nav_bar)
 
-        # add room light control area
+        # add selected_room light control area
         self.room_screen_manager = RoomScreenManager()
         self.root.add_widget(self.room_screen_manager)
 
@@ -38,8 +38,6 @@ class WizWizardApp(App):
     def re_build(self):
         self.nav_bar.build()
         self.room_screen_manager.build()
-        self.add_room_form = AddRoomView()
-        self.assign_light_form = AssignLightView()
 
     def set_current_room(self, room_id):
         self.room_screen_manager.current = room_id

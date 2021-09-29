@@ -8,7 +8,7 @@ class NavBar(GridLayout):
         super().__init__(**kwargs)
 
         # formatting
-        self.cols = 2
+        self.cols = 3
         self.size_hint_y = 0.2
         self.padding = 10
 
@@ -16,11 +16,12 @@ class NavBar(GridLayout):
 
     def build(self):
         self.clear_widgets()
-        self.add_widget(self.RoomNavbar())
-        self.add_widget(self.AddRoomButton())
+        ws = (self.RoomNavbar(), self.AddRoomButton(), self.AddLightButton())
+        for w in ws:
+            self.add_widget(w)
 
     class RoomNavbar(GridLayout):
-        """Grid layout to hold room buttons"""
+        """Grid layout to hold selected_room buttons"""
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
             self.app: App = App.get_running_app()
@@ -33,7 +34,8 @@ class NavBar(GridLayout):
         def build(self) -> None:
             # add buttons for rooms
             for room in self.app.home.rooms:
-                self.add_widget(self.RoomNavButton(room.name, room.id))
+                room_button = self.RoomNavButton(room.name, room.id)
+                self.add_widget(room_button)
 
         class RoomNavButton(Button):
             """A button for selecting the room to control lights in"""
@@ -41,7 +43,7 @@ class NavBar(GridLayout):
                 super().__init__(**kwargs)
                 self.app = App.get_running_app()
 
-                # store the room name and id
+                # store the selected_room name and id
                 self.room_name = room_name
                 self.room_id: str = room_id
 
@@ -50,7 +52,7 @@ class NavBar(GridLayout):
                 self.on_release = self.show_room
 
             def show_room(self):
-                """Set room controls page to this room using the room id"""
+                """Set selected_room controls page to this selected_room using the selected_room id"""
                 self.app.set_current_room(self.room_id)
 
     class AddRoomButton(Button):
@@ -61,3 +63,12 @@ class NavBar(GridLayout):
             self.text = '+ Add room'
             self.size_hint = 0.2, 0.2
             self.on_release = self.app.add_room_form.open
+
+    class AddLightButton(Button):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.app = App.get_running_app()
+
+            self.text = '+ Add light'
+            self.size_hint = 0.2, 0.2
+            self.on_release = self.app.assign_light_form.open

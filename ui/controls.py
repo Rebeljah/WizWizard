@@ -11,8 +11,8 @@ from models.room import Room
 
 class RoomScreenManager(ScreenManager):
     """
-    Holds a RoomControlPage for each room in the Home . Each page allows the
-    user to select and control lights in a room.
+    Holds a RoomControlPage for each selected_room in the Home . Each page allows the
+    user to select and control lights in a selected_room.
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -30,14 +30,14 @@ class RoomScreenManager(ScreenManager):
 
 class RoomControlPage(Screen):
     """
-    A screen to allow the user to select and control lights in a room. Belongs
+    A screen to allow the user to select and control lights in a selected_room. Belongs
     to the RoomScreenManager object and has a LightSelectionGrid and a ControlPanel.
     """
     def __init__(self, room: Room, **kwargs):
         super().__init__(**kwargs)
         self.name = room.id  # used for switching screens
 
-        # the room this page controls
+        # the selected_room this page controls
         self.room: Room = room
 
         # formatting
@@ -84,8 +84,6 @@ class RoomControlPage(Screen):
 
                 # button formatting
                 self.text = light.name
-
-                # button press / release behavior
                 self.state = "down"  # "normal"
                 self.bind(state=self.on_toggle)
 
@@ -98,7 +96,7 @@ class RoomControlPage(Screen):
 
     class ControlPanel(GridLayout):
         """
-        A control panel to edit the state of the lights in a room selected by the
+        A control panel to edit the state of the lights in a selected_room selected by the
         LightSelectionGrid. Belongs to a RoomControlPage.
         """
         def __init__(self, lights: list[Light], **kwargs):

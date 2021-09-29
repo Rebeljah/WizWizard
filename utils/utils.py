@@ -8,6 +8,7 @@ import random
 
 def discover_bulbs():
     """discover lights on LAN and return them"""
+    # TODO handle literal IP here
     lan_bulbs: list = aio.run(pwz.discovery.discover_lights('192.168.1.255'))
     return lan_bulbs
 
@@ -26,6 +27,6 @@ def load_json(filepath: str) -> dict:
 
 
 def create_uid(length: int = 7) -> str:
-    """Return a unique identifier for a room or home"""
+    """Return a unique identifier for a selected_room or home"""
     r = random
     return ''.join(str(r.randint(0, 9)) for _ in range(length))
