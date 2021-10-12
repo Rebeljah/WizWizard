@@ -1,4 +1,7 @@
+from typing import Optional as Opt
+
 from models.light import Light
+from utils.utils import create_uid
 
 
 class Room:
@@ -8,16 +11,30 @@ class Room:
         'kitchen', 'living room', 'office', 'playroom', 'terrace', 'tv'
     )
 
-    def __init__(self, room_name: str, room_type: str, room_id: str):
-        self._id = room_id  # read only
+    def __init__(self, room_name: str, room_type: str, room_id: Opt[str] = ''):
+        # parent
+        self.home = None
+        # children
+        self.lights: list[Light] = []
+
+        # set or generate uid
+        if room_id:
+            self._id = room_id
+        else:
+            self._id = create_uid()
+
+        # room info
         self.type: str = room_type
         self.name = room_name
-        self.lights: list[Light] = []
 
     @property
     def id(self) -> str:
         """Read-only alias of self._id"""
         return self._id
 
-    def add_light(self, light: Light) -> None:
+    def add_light(self, light):
+        """Add the light to this room"""
+        if light.room is not None:
+            light.room.lights.remove(light)
+        light.room = self
         self.lights.append(light)

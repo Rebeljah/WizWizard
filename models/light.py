@@ -3,20 +3,29 @@ Module to contain code for lights and light groups for controlling lights in roo
 """
 import pywizlight as pwz
 from pywizlight import PilotBuilder, PilotParser
-
 import asyncio as aio
 
-Bulb = pwz.wizlight
+from typing import Union
+
+from . bulb import Bulb
 
 
 class Light:
+    # TODO add light type names as a class var like the room class
     """Class to represent a light object that controls a real bulb"""
-    def __init__(self, name: str, mac: str):
-        self.name = name
-        self._mac = mac  # read only, use mac property
+    def __init__(self, name: str, mac: str, bulb: Union[Bulb, None]):
+        # parent
+        self.room = None
 
-        self.bulb: Bulb = None  # light will be unavailable if MAC not found on LAN
-        self.connected = False  #
+        # light info
+        self._mac = mac  # read only, use mac property
+        self.name = name
+
+        # bulb that controls a light
+        if bulb is None:
+            self.bulb = bulb
+        else:
+            self.set_bulb(bulb)
 
     def __hash__(self):
         return hash(self.mac)
@@ -39,17 +48,17 @@ class Light:
 
     def set_bulb(self, bulb: Bulb) -> None:
         """attach a bulb to this light, the MAC address must match"""
+        assert bulb.mac == self._mac
         self.bulb = bulb
         aio.run(self.bulb.updateState())
-        self.connected = True
 
     def toggle(self) -> None:
         """acts like a lightswitch"""
         aio.run(self.bulb.lightSwitch())
 
     def set_brightness(self, brightness: int) -> None:
-        """Set bulb brightness from 0-255"""
+        """Set light brightness from 0-255"""
         if 0 <= brightness <= 255:
             aio.run(self.bulb.turn_on(PilotBuilder(brightness=brightness)))
         else:
-            raise ValueError(f"brightness ({brightness} not in range 0-255)")
+            raise ValueError(f"brightness ({brightness}) not in range 0-255")

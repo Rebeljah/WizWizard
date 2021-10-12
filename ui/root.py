@@ -1,43 +1,40 @@
+
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.button import Button
 
 from models.home import Home
+from . import navbar
 
-from ui.controls import RoomScreenManager
-from ui.navbar import NavBar
-from ui.forms import AddRoomView, AssignLightView
 
-from utils.utils import create_uid
+class RootGridLayout(GridLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.clear_widgets()
+
+        self.rows = 3
+
+        # add top navbar
+        self.add_widget(widget := navbar.Navbar())
+        self.nav_bar = widget
+
+        # TODO DEBUG just for filler
+        self.add_widget(Button())
 
 
 class WizWizardApp(App):
     """Main app to launch UI"""
     def __init__(self, home: Home, **kwargs):
         super().__init__(**kwargs)
-        self.home: Home = home
+        self.home = home
 
-        # form for adding new rooms
-        self.add_room_form = AddRoomView()
-        # form for assigning lights to a selected_room
-        self.assign_light_form = AssignLightView()
-
-        # overall GridLayout
-        self.root = GridLayout(rows=2)
-
-        # add top navbar
-        self.nav_bar = NavBar()
-        self.root.add_widget(self.nav_bar)
-
-        # add selected_room light control area
-        self.room_screen_manager = RoomScreenManager()
-        self.root.add_widget(self.room_screen_manager)
+        # main content root
+        self.root = RootGridLayout()
 
     def build(self):
         return self.root
 
-    def re_build(self):
-        self.nav_bar.build()
-        self.room_screen_manager.build()
-
-    def set_current_room(self, room_id):
-        self.room_screen_manager.current = room_id
+    def on_edit_home(self) -> None:
+        """save home data and refresh UI"""
+        self.home.save_to_json()
+        self.root.__init__()

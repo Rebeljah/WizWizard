@@ -1,74 +1,48 @@
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
-from kivy.app import App
+from kivy.uix.dropdown import DropDown
+
+from . import forms
 
 
-class NavBar(GridLayout):
+class Navbar(GridLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         # formatting
-        self.cols = 3
+        self.cols = 9
         self.size_hint_y = 0.2
         self.padding = 10
 
         self.build()
 
     def build(self):
+        def build_room_buttons():
+            """Build the buttons for selecting the room to be controlled"""
+            pass
+
+        def build_dropdown():
+            """Build dropdown to hold add item buttons"""
+            # button to open dropdown
+            dropdown = dropdown = DropDown()
+            self.add_widget(Button(
+                text='Menu',
+                on_release=dropdown.open
+            ))
+            dropdown.add_widget(Button(
+                size_hint_y=None,
+                height=44,
+                text='+ Room',
+                on_release=lambda btn: forms.AddRoomForm().open()
+            ))
+            dropdown.add_widget(Button(
+                size_hint_y=None,
+                height=44,
+                text='+ Light',
+                on_release=lambda btn: forms.AddLightForm().open()
+            ))
+
         self.clear_widgets()
-        ws = (self.RoomNavbar(), self.AddRoomButton(), self.AddLightButton())
-        for w in ws:
-            self.add_widget(w)
 
-    class RoomNavbar(GridLayout):
-        """Grid layout to hold selected_room buttons"""
-        def __init__(self, **kwargs):
-            super().__init__(**kwargs)
-            self.app: App = App.get_running_app()
-
-            self.cols = 7
-            self.rows = 1
-
-            self.build()
-
-        def build(self) -> None:
-            # add buttons for rooms
-            for room in self.app.home.rooms:
-                room_button = self.RoomNavButton(room.name, room.id)
-                self.add_widget(room_button)
-
-        class RoomNavButton(Button):
-            """A button for selecting the room to control lights in"""
-            def __init__(self, room_name: str, room_id: str, **kwargs):
-                super().__init__(**kwargs)
-                self.app = App.get_running_app()
-
-                # store the selected_room name and id
-                self.room_name = room_name
-                self.room_id: str = room_id
-
-                # button formatting
-                self.text = self.room_name
-                self.on_release = self.show_room
-
-            def show_room(self):
-                """Set selected_room controls page to this selected_room using the selected_room id"""
-                self.app.set_current_room(self.room_id)
-
-    class AddRoomButton(Button):
-        def __init__(self, **kwargs):
-            super().__init__(**kwargs)
-            self.app = App.get_running_app()
-
-            self.text = '+ Add room'
-            self.size_hint = 0.2, 0.2
-            self.on_release = self.app.add_room_form.open
-
-    class AddLightButton(Button):
-        def __init__(self, **kwargs):
-            super().__init__(**kwargs)
-            self.app = App.get_running_app()
-
-            self.text = '+ Add light'
-            self.size_hint = 0.2, 0.2
-            self.on_release = self.app.assign_light_form.open
+        build_room_buttons()
+        build_dropdown()
