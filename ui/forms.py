@@ -19,7 +19,7 @@ from . import popup, widgets
 
 
 class FormABC(ModalView):
-    """Base class for all forms. Defines a general strategy for creating a form"""
+    """Base class for all forms"""
     @abstractmethod
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -105,7 +105,7 @@ class AddRoomForm(FormABC):
     def _do_form_actions(self):
         """create a new room from the form data and add it to the current home"""
         app = App.get_running_app()
-        new_room = Room(app.home, self.room_name.text, self.room_type.text)
+        new_room = Room(self.room_name.text, self.room_type.text)
         app.home.add_room(new_room)
         app.on_edit_home()
 
