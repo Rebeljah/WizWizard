@@ -2,6 +2,20 @@
     "name": "Demo Home",
     "id": "0000000",
     "rooms": [
-
+        {
+            "name": "bdtest",
+            "type": "bedroom",
+            "id": "4597123",
+            "lights": [
+                {
+                    "name": "Enter light name",
+                    "mac": "a8bb50cf597b"
+                },
+                {
+                    "name": "Enter light name",
+                    "mac": "a8bb50c5c646"
+                }
+            ]
+        }
     ]
 }

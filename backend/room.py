@@ -1,6 +1,6 @@
 from typing import Optional as Opt
 
-from models.light import Light
+from backend.light import Light
 from utils.utils import create_uid
 
 

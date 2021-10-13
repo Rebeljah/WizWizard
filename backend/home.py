@@ -4,8 +4,8 @@ import asyncio as aio
 
 import pywizlight as pwz
 
-from models.room import Room
-from models.light import Light
+from backend.room import Room
+from backend.light import Light
 from utils import utils
 
 # typing

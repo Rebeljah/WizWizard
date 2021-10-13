@@ -7,7 +7,7 @@ import os
 import random
 import string
 
-from models.bulb import Bulb
+from backend.bulb import Bulb
 
 # typing
 MAC = str

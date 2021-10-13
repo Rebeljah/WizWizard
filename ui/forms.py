@@ -14,7 +14,7 @@ from kivy.uix.textinput import TextInput
 from abc import abstractmethod
 from functools import partial
 
-from models.room import Room
+from backend.room import Room
 from . import popup, widgets
 
 
@@ -134,8 +134,7 @@ class AddLightForm(FormABC):
             on_release=self.light_dropdown.open
         ))
         # add items to light dropdown menu
-        lights = self.app.home.unassigned.lights
-        for light in lights:
+        for light in self.app.home.unassigned.lights:
             self.light_dropdown.add_widget(Button(
                 text=light.mac,
                 size_hint_y=None,
@@ -181,8 +180,8 @@ class AddLightForm(FormABC):
     def _do_form_actions(self):
         light = self.light_dropdown.selected_value
         light.name = self.light_name.text
-        room = self.room_dropdown.selected_value
-        room.add_light(light)
 
-        app = App.get_running_app()
-        app.on_edit_home()
+        room = self.room_dropdown.selected_value
+
+        room.add_light(light)
+        App.get_running_app().on_edit_home()

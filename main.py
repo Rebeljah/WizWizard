@@ -1,5 +1,5 @@
 from ui.root import WizWizardApp
-from models.home import Home
+from backend.home import Home
 
 
 if __name__ == '__main__':

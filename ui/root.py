@@ -3,23 +3,42 @@ from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 
-from models.home import Home
-from . import navbar
+from backend.home import Home
+from backend.room import Room
+from backend.light import Light
+from .navbar import Navbar
+from .light_area import LightArea
+from.control_panel import ControlPanel
 
 
 class RootGridLayout(GridLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
-        self.clear_widgets()
-
+        self.app = app
         self.rows = 3
 
-        # add top navbar
-        self.add_widget(widget := navbar.Navbar())
-        self.nav_bar = widget
+        self.navbar = Navbar
+        self.light_area = LightArea
+        self.control_panel = ControlPanel
+        self.build()
 
-        # TODO DEBUG just for filler
-        self.add_widget(Button())
+    def build(self):
+        self.clear_widgets()
+
+        # add top navbar
+        self.navbar = Navbar()
+        self.add_widget(self.navbar)
+
+        # add light selection area
+        self.light_area = LightArea()
+        self.add_widget(self.light_area)
+
+        # add control panel
+        self.control_panel = ControlPanel()
+        self.add_widget(self.control_panel)
+
+    def set_shown_room(self, room: Room):
+        self.light_area.set_room(room)
 
 
 class WizWizardApp(App):
@@ -29,7 +48,7 @@ class WizWizardApp(App):
         self.home = home
 
         # main content root
-        self.root = RootGridLayout()
+        self.root = RootGridLayout(self)
 
     def build(self):
         return self.root
@@ -37,4 +56,4 @@ class WizWizardApp(App):
     def on_edit_home(self) -> None:
         """save home data and refresh UI"""
         self.home.save_to_json()
-        self.root.__init__()
+        self.root.build()

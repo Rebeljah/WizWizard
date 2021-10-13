@@ -5,7 +5,8 @@ import pywizlight as pwz
 from pywizlight import PilotBuilder, PilotParser
 import asyncio as aio
 
-from typing import Union
+from typing import Union, Iterable
+from abc import ABC, abstractmethod
 
 from . bulb import Bulb
 
@@ -22,13 +23,11 @@ class Light:
         self.name = name
 
         # bulb that controls a light
+        self.connected = False
         if bulb is None:
             self.bulb = bulb
         else:
             self.set_bulb(bulb)
-
-    def __hash__(self):
-        return hash(self.mac)
 
     @property
     def mac(self) -> str:
@@ -51,6 +50,7 @@ class Light:
         assert bulb.mac == self._mac
         self.bulb = bulb
         aio.run(self.bulb.updateState())
+        self.connected = True
 
     def toggle(self) -> None:
         """acts like a lightswitch"""
@@ -62,3 +62,25 @@ class Light:
             aio.run(self.bulb.turn_on(PilotBuilder(brightness=brightness)))
         else:
             raise ValueError(f"brightness ({brightness}) not in range 0-255")
+
+
+class LightCommand(ABC):
+    # TODO dig into bulb source code to see if async would benefit speed when commanding bulbs
+    """A command that can be run asynchronously"""
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    async def execute(self):
+        # send messages to bulb
+        pass
+
+    @abstractmethod
+    async def unexecute(self):
+        # send undo message to bulb
+        pass
+
+
+async def run_commands(commands: Iterable[LightCommand]):
+    for command in commands:
+        await command.execute()
