@@ -10,12 +10,14 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
+from kivy.uix.dropdown import DropDown
 
-from abc import abstractmethod
 from functools import partial
+from abc import abstractmethod
+from typing import Any
 
 from backend.room import Room
-from . import popup, widgets
+from ui import popup
 
 
 class FormABC(ModalView):
@@ -121,8 +123,8 @@ class AddLightForm(FormABC):
         self.add_widget(self.layout)
 
         # form fields
-        self.light_dropdown = widgets.ItemDropDown()
-        self.room_dropdown = widgets.ItemDropDown()
+        self.light_dropdown = ItemDropDown()
+        self.room_dropdown = ItemDropDown()
         self.light_name = TextInput()
 
         self.build()
@@ -185,3 +187,23 @@ class AddLightForm(FormABC):
 
         room.add_light(light)
         App.get_running_app().on_edit_home()
+
+
+class ItemDropDown(DropDown):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.app = App.get_running_app()
+
+        self._selected_value: Any = None
+
+    @property
+    def selected_value(self):
+        return self._selected_value
+
+    def select_(self, value, btn):
+        """Alias to DropDown.select() which takes an unused button arg from the
+        dropdown when selected"""
+        self.select(value)
+
+    def on_select(self, value: Any):
+        self._selected_value = value

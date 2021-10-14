@@ -1,7 +1,6 @@
 
 import pywizlight as pwz
 from pywizlight.discovery import find_wizlights
-import asyncio as aio
 import json
 import os
 import random

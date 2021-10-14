@@ -5,7 +5,8 @@ from kivy.uix.dropdown import DropDown
 
 from functools import partial
 
-from . import forms
+from backend.room import Room
+from ui import forms
 
 
 class Navbar(GridLayout):
@@ -31,12 +32,18 @@ class Navbar(GridLayout):
                 on_release=partial(lambda r, btn: app.root.set_shown_room(r), room)
             ))
 
+        unassigned: Room = app.home.unassigned
+        self.add_widget(Button(
+            text='Unassigned',
+            on_release=partial(lambda r, btn: app.root.set_shown_room(r), unassigned)
+        ))
+
         """Build dropdown to hold add item buttons"""
         # button to open dropdown
-        dropdown = dropdown = DropDown()
+        dropdown = DropDown()
         self.add_widget(Button(
             text='Menu',
-            on_release=dropdown.open
+            on_release=lambda btn: dropdown.open(btn)
         ))
         dropdown.add_widget(Button(
             size_hint_y=None,

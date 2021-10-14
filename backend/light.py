@@ -5,10 +5,10 @@ import pywizlight as pwz
 from pywizlight import PilotBuilder, PilotParser
 import asyncio as aio
 
-from typing import Union, Iterable
+from typing import Union, Iterable, Callable
 from abc import ABC, abstractmethod
 
-from . bulb import Bulb
+from backend.bulb import Bulb
 
 
 class Light:
@@ -65,20 +65,36 @@ class Light:
 
 
 class LightCommand(ABC):
-    # TODO dig into bulb source code to see if async would benefit speed when commanding bulbs
     """A command that can be run asynchronously"""
-    def __init__(self):
-        pass
+    def __init__(self, light: Light):
+        self.light = light
 
     @abstractmethod
     async def execute(self):
-        # send messages to bulb
+        """Do async bulb actions"""
         pass
 
-    @abstractmethod
-    async def unexecute(self):
-        # send undo message to bulb
-        pass
+
+class TurnOnLight(LightCommand):
+    def __init__(self, light: Light):
+        super().__init__(light)
+
+    async def execute(self):
+        bulb: Bulb = self.light.bulb
+        await bulb.turn_on()
+
+
+class TurnOffLight(LightCommand):
+    def __init__(self, light: Light):
+        super().__init__(light)
+
+    async def execute(self):
+        bulb: Bulb = self.light.bulb
+        await bulb.turn_off()
+
+
+def build_commands(command, lights) -> list:
+    return [command(light) for light in lights]
 
 
 async def run_commands(commands: Iterable[LightCommand]):

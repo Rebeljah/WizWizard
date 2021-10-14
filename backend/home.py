@@ -6,7 +6,7 @@ import pywizlight as pwz
 
 from backend.room import Room
 from backend.light import Light
-from utils import utils
+from backend import utils
 
 # typing
 from typing import Iterator, Optional

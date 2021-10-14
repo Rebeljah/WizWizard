@@ -9,16 +9,20 @@ from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.slider import Slider
 from kivy.uix.button import Button
+import asyncio
+
+from backend import light
+from backend.light import TurnOnLight, TurnOffLight
 
 
 class ControlPanel(GridLayout):
     """
     A control panel to control lights
-
-
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.app = App.get_running_app()
+        self.root = self.app.root
 
         self.cols = 1
 
@@ -39,11 +43,30 @@ class ControlPanel(GridLayout):
             self.add_widget(self.brightness_slider)
 
         # add on/off/dim buttons
-        self.on_button = Button(text='ON', on_release=lambda btn: print('on!'))
+        self.on_button = Button(
+            text='ON',
+            on_release=lambda btn: self.command_lights(TurnOnLight)
+        )
+        self.off_button = Button(
+            text='OFF',
+            on_release=lambda btn: self.command_lights(TurnOffLight)
+        )
+
         self.dim_button = Button(text='DIM', on_release=lambda btn: print('dim!'))
-        self.off_button = Button(text='OFF', on_release=lambda btn: print('off!'))
+
         grid = GridLayout(cols=3)
         grid.add_widget(self.on_button)
         grid.add_widget(self.dim_button)
         grid.add_widget(self.off_button)
         self.add_widget(grid)
+
+
+def command_lights(self, command):
+    """Build the command for each selected light and run the commands"""
+    app = App.get_running_app()
+
+    commands = light.build_commands(
+        command=command,
+        lights=app.root.light_area.selected_lights
+    )
+    asyncio.run(light.run_commands(commands))

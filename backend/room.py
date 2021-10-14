@@ -1,7 +1,7 @@
 from typing import Optional as Opt
 
 from backend.light import Light
-from utils.utils import create_uid
+from backend.utils import create_uid
 
 
 class Room:

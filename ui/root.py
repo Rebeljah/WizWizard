@@ -1,14 +1,12 @@
 
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.button import Button
 
 from backend.home import Home
 from backend.room import Room
-from backend.light import Light
-from .navbar import Navbar
-from .light_area import LightArea
-from.control_panel import ControlPanel
+from ui.navbar import Navbar
+from ui.light_area import LightArea
+from ui.control_panel import ControlPanel
 
 
 class RootGridLayout(GridLayout):
