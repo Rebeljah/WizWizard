@@ -11,8 +11,7 @@ from kivy.uix.slider import Slider
 from kivy.uix.button import Button
 import asyncio
 
-from backend import light
-from backend.light import TurnOnLight, TurnOffLight
+import backend.light_commands as command
 
 
 class ControlPanel(GridLayout):
@@ -42,31 +41,40 @@ class ControlPanel(GridLayout):
             self.brightness_slider = Slider()
             self.add_widget(self.brightness_slider)
 
-        # add on/off/dim buttons
+        # build on/off/dim buttons
         self.on_button = Button(
             text='ON',
-            on_release=lambda btn: self.command_lights(TurnOnLight)
+            on_release=lambda btn: self.command_lights(
+                command.TurnOnLight)
         )
         self.off_button = Button(
             text='OFF',
-            on_release=lambda btn: self.command_lights(TurnOffLight)
+            on_release=lambda btn: self.command_lights(
+                command.TurnOffLight)
         )
 
-        self.dim_button = Button(text='DIM', on_release=lambda btn: print('dim!'))
+        self.dim_button = Button(
+            text='DIM',
+            on_release=lambda btn: self.command_lights(
+                command.SetBrightness, brightness=1)
+        )
 
+        # place on/off/dim buttons
         grid = GridLayout(cols=3)
         grid.add_widget(self.on_button)
         grid.add_widget(self.dim_button)
         grid.add_widget(self.off_button)
         self.add_widget(grid)
 
+    @staticmethod
+    def command_lights(light_command, **kwargs):
+        """Build the command for each selected light and run the commands"""
+        app = App.get_running_app()
+        commanded_lights = app.root.light_area.selected_lights
 
-def command_lights(self, command):
-    """Build the command for each selected light and run the commands"""
-    app = App.get_running_app()
-
-    commands = light.build_commands(
-        command=command,
-        lights=app.root.light_area.selected_lights
-    )
-    asyncio.run(light.run_commands(commands))
+        commands = command.build_commands(
+            command=light_command,
+            lights=commanded_lights,
+            **kwargs
+        )
+        asyncio.run(command.run_commands(commands))

@@ -3,17 +3,13 @@
     "id": "0000000",
     "rooms": [
         {
-            "name": "bdtest",
+            "name": "Front Bed",
             "type": "bedroom",
-            "id": "4597123",
+            "id": "9431062",
             "lights": [
                 {
-                    "name": "Enter light name",
+                    "name": "Tube lamp",
                     "mac": "a8bb50cf597b"
-                },
-                {
-                    "name": "Enter light name",
-                    "mac": "a8bb50c5c646"
                 }
             ]
         }
