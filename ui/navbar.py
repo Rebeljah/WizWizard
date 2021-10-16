@@ -13,7 +13,6 @@ class Navbar(GridLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        # formatting
         self.rows = 1
         self.size_hint_y = 0.2
         self.padding = 10
@@ -23,23 +22,22 @@ class Navbar(GridLayout):
     def build(self):
         self.clear_widgets()
 
-        """Build the buttons for selecting the room to be controlled"""
         app = App.get_running_app()
+        rooms: list[Room] = app.home.rooms[:]
+        unassigned_room = app.home.unassigned
+        if len(unassigned_room.lights):
+            rooms.append(app.home.unassigned)
 
-        for room in app.home.rooms:
+        for room in rooms:
             self.add_widget(Button(
                 text=room.name,
-                on_release=partial(lambda r, btn: app.root.set_shown_room(r), room)
+                on_release=partial(
+                    lambda lights, btn: app.root.set_shown_lights(lights),
+                    room.lights
+                )
             ))
 
-        unassigned: Room = app.home.unassigned
-        self.add_widget(Button(
-            text='Unassigned',
-            on_release=partial(lambda r, btn: app.root.set_shown_room(r), unassigned)
-        ))
-
-        """Build dropdown to hold add item buttons"""
-        # button to open dropdown
+        # Build dropdown to hold add item buttons
         dropdown = DropDown()
         self.add_widget(Button(
             text='Menu',

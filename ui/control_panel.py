@@ -30,16 +30,20 @@ class ControlPanel(GridLayout):
         self.dim_button = Button
         self.off_button = Button
 
-        self.show_brightness_slider = True
-
         self.build()
 
     def build(self):
         self.clear_widgets()
 
-        if self.show_brightness_slider:
-            self.brightness_slider = Slider()
-            self.add_widget(self.brightness_slider)
+        # build brightness slider
+        self.brightness_slider = Slider(
+            min=0, max=255
+        )
+        self.brightness_slider.bind(
+            value=lambda slider, val: self.command_lights(
+                command.SetBrightness, brightness=val
+            )
+        )
 
         # build on/off/dim buttons
         self.on_button = Button(
@@ -59,6 +63,9 @@ class ControlPanel(GridLayout):
                 command.SetBrightness, brightness=1)
         )
 
+        # place brightness slider
+        self.add_widget(self.brightness_slider)
+
         # place on/off/dim buttons
         grid = GridLayout(cols=3)
         grid.add_widget(self.on_button)
@@ -68,7 +75,7 @@ class ControlPanel(GridLayout):
 
     @staticmethod
     def command_lights(light_command, **kwargs):
-        """Build the command for each selected light and run the commands"""
+        """Build the command for each selected light then run the commands"""
         app = App.get_running_app()
         commanded_lights = app.root.light_area.selected_lights
 

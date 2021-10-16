@@ -3,7 +3,6 @@ from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
 
 from backend.home import Home
-from backend.room import Room
 from ui.navbar import Navbar
 from ui.light_area import LightArea
 from ui.control_panel import ControlPanel
@@ -13,6 +12,7 @@ class RootGridLayout(GridLayout):
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
         self.app = app
+
         self.rows = 3
 
         self.navbar = Navbar
@@ -35,8 +35,9 @@ class RootGridLayout(GridLayout):
         self.control_panel = ControlPanel()
         self.add_widget(self.control_panel)
 
-    def set_shown_room(self, room: Room):
-        self.light_area.set_room(room)
+    def set_shown_lights(self, lights):
+        """Set the lights show in the light area"""
+        self.light_area.set_lights(lights)
 
 
 class WizWizardApp(App):

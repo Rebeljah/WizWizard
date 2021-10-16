@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import Iterable, Union
 from pywizlight import PilotBuilder
+import asyncio
 
 from backend.light import Light
 
 
 class LightCommand(ABC):
     """A command that can be run asynchronously"""
-
-    def __init__(self, light: Light):
+    def __init__(self, light: Light, **kwargs):
         self.light = light
 
     @abstractmethod
@@ -17,17 +17,17 @@ class LightCommand(ABC):
         pass
 
 
-def build_commands(command, lights, **kwargs) -> list:
+def build_commands(command, lights: Iterable[Light], **kwargs) -> list:
     return [command(light, **kwargs) for light in lights]
 
 
 async def run_commands(commands: Iterable[LightCommand]):
-    for command in commands:
-        await command.execute()
+    await asyncio.gather(
+        *[command.execute() for command in commands]
+    )
 
 
 class TurnOnLight(LightCommand):
-
     def __init__(self, light: Light):
         super().__init__(light)
 
@@ -36,7 +36,6 @@ class TurnOnLight(LightCommand):
 
 
 class TurnOffLight(LightCommand):
-
     def __init__(self, light: Light):
         super().__init__(light)
 
