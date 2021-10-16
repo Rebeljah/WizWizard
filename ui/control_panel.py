@@ -17,10 +17,10 @@ class ControlPanel(GridLayout):
     """
     A control panel to control lights
     """
-    def __init__(self, **kwargs):
+    def __init__(self, selected_lights: set, **kwargs):
         super().__init__(**kwargs)
         self.app = App.get_running_app()
-        self.root = self.app.root
+        self.selected_lights = selected_lights
 
         self.cols = 1
 
@@ -38,9 +38,10 @@ class ControlPanel(GridLayout):
         self.brightness_slider = Slider(
             min=0, max=255
         )
-        self.brightness_slider.bind(
-            value=lambda slider, val: self.command_lights(
-                command.SetBrightness, brightness=val
+        self.brightness_slider.bind(value=lambda _, val: command.command_lights(
+                lights=self.selected_lights,
+                light_command=command.SetBrightness,
+                brightness=val
             )
         )
 
@@ -48,19 +49,22 @@ class ControlPanel(GridLayout):
         self.on_button = Button(
             text='ON',
             on_release=lambda btn: command.command_lights(
-                lights=self.root.light_area.selected_lights,
+                lights=self.selected_lights,
                 light_command=command.TurnOnLight)
         )
         self.off_button = Button(
             text='OFF',
-            on_release=lambda btn: self.command_lights(
-                command.TurnOffLight)
+            on_release=lambda btn: command.command_lights(
+                lights=self.selected_lights,
+                light_command=command.TurnOffLight)
         )
 
         self.dim_button = Button(
             text='DIM',
-            on_release=lambda btn: self.command_lights(
-                command.SetBrightness, brightness=1)
+            on_release=lambda btn: command.command_lights(
+                lights=self.selected_lights,
+                light_command=command.SetBrightness,
+                brightness=1)
         )
 
         # place brightness slider

@@ -32,7 +32,7 @@ class RootGridLayout(GridLayout):
         self.add_widget(self.light_area)
 
         # add control panel
-        self.control_panel = ControlPanel()
+        self.control_panel = ControlPanel(self.light_area.selected_lights)
         self.add_widget(self.control_panel)
 
     def set_shown_lights(self, lights):
