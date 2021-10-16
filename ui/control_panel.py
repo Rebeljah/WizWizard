@@ -9,7 +9,6 @@ from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.slider import Slider
 from kivy.uix.button import Button
-import asyncio
 
 import backend.light_commands as command
 
@@ -44,8 +43,9 @@ class ControlPanel(GridLayout):
         # build on/off/dim buttons
         self.on_button = Button(
             text='ON',
-            on_release=lambda btn: self.command_lights(
-                command.TurnOnLight)
+            on_release=lambda btn: command.command_lights(
+                lights=self.root.light_area.selected_lights,
+                light_command=command.TurnOnLight)
         )
         self.off_button = Button(
             text='OFF',
@@ -66,15 +66,4 @@ class ControlPanel(GridLayout):
         grid.add_widget(self.off_button)
         self.add_widget(grid)
 
-    @staticmethod
-    def command_lights(light_command, **kwargs):
-        """Build the command for each selected light and run the commands"""
-        app = App.get_running_app()
-        commanded_lights = app.root.light_area.selected_lights
 
-        commands = command.build_commands(
-            command=light_command,
-            lights=commanded_lights,
-            **kwargs
-        )
-        asyncio.run(command.run_commands(commands))
