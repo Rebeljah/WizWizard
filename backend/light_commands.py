@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Iterable, Union
+from typing import Iterable
+import asyncio
 from pywizlight import PilotBuilder
 import asyncio
+
 
 from backend.light import Light
 
@@ -15,16 +17,6 @@ class LightCommand(ABC):
     async def execute(self):
         """Do async bulb actions"""
         pass
-
-
-def build_commands(command, lights: Iterable[Light], **kwargs) -> list:
-    return [command(light, **kwargs) for light in lights]
-
-
-async def run_commands(commands: Iterable[LightCommand]):
-    await asyncio.gather(
-        *[command.execute() for command in commands]
-    )
 
 
 class TurnOnLight(LightCommand):
@@ -57,3 +49,27 @@ class SetBrightness(LightCommand):
         await self.light.bulb.turn_on(
             PilotBuilder(brightness=self.brightness)
         )
+
+
+def command_lights(lights, light_command, **kwargs):
+    """Build the command for each selected light and run the commands"""
+    commands = build_commands(
+        command_class=light_command,
+        lights=lights,
+        **kwargs
+    )
+    asyncio.run(run_commands(commands))
+
+
+def build_commands(command_class, lights, **kwargs) -> list:
+    """Instantiate the given command class with each light. Returns a list of
+    commands that are concrete LightCommand instances."""
+    if not issubclass(command_class, LightCommand):
+        raise TypeError(f'{command_class} is not a subclass of {LightCommand}')
+
+    return [command_class(light, **kwargs) for light in lights]
+
+
+async def run_commands(commands: Iterable[LightCommand]):
+    for command in commands:
+        await command.execute()
