@@ -1,43 +1,58 @@
+
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
 
-from models.home import Home
+from backend.home import Home
+from ui.navbar import Navbar
+from ui.light_area import LightArea
+from ui.control_panel import ControlPanel
 
-from ui.controls import RoomScreenManager
-from ui.navbar import NavBar
-from ui.forms import AddRoomView, AssignLightView
 
-from utils.utils import create_uid
+class RootGridLayout(GridLayout):
+    def __init__(self, app, **kwargs):
+        super().__init__(**kwargs)
+        self.app = app
+
+        self.rows = 3
+
+        self.navbar = Navbar
+        self.light_area = LightArea
+        self.control_panel = ControlPanel
+        self.build()
+
+    def build(self):
+        self.clear_widgets()
+
+        # add top navbar
+        self.navbar = Navbar()
+        self.add_widget(self.navbar)
+
+        # add light selection area
+        self.light_area = LightArea()
+        self.add_widget(self.light_area)
+
+        # add control panel
+        self.control_panel = ControlPanel(self.light_area.selected_lights)
+        self.add_widget(self.control_panel)
+
+    def set_shown_lights(self, lights):
+        """Set the lights show in the light area"""
+        self.light_area.set_lights(lights)
 
 
 class WizWizardApp(App):
     """Main app to launch UI"""
-    def __init__(self, home: Home, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.home: Home = home
+        self.home = Home.from_save('0000000')
 
-        # form for adding new rooms
-        self.add_room_form = AddRoomView()
-        # form for assigning lights to a selected_room
-        self.assign_light_form = AssignLightView()
-
-        # overall GridLayout
-        self.root = GridLayout(rows=2)
-
-        # add top navbar
-        self.nav_bar = NavBar()
-        self.root.add_widget(self.nav_bar)
-
-        # add selected_room light control area
-        self.room_screen_manager = RoomScreenManager()
-        self.root.add_widget(self.room_screen_manager)
+        # main content root
+        self.root = RootGridLayout(self)
 
     def build(self):
         return self.root
 
-    def re_build(self):
-        self.nav_bar.build()
-        self.room_screen_manager.build()
-
-    def set_current_room(self, room_id):
-        self.room_screen_manager.current = room_id
+    def on_edit_home(self) -> None:
+        """save home data and refresh UI"""
+        self.home.save_to_json()
+        self.root.build()
