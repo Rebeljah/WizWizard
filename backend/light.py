@@ -1,12 +1,10 @@
 """
 Module to contain code for lights and light groups for controlling lights in rooms
 """
-import pywizlight as pwz
-from pywizlight import PilotBuilder, PilotParser
+from pywizlight import PilotParser
 import asyncio as aio
 
-from typing import Union, Iterable, Callable
-from abc import ABC, abstractmethod
+from typing import Union
 
 from backend.bulb import Bulb
 
@@ -23,7 +21,7 @@ class Light:
         self.name = name
 
         # bulb that controls a light
-        self.connected = False
+        self.is_connected = False
         if bulb is None:
             self.bulb = bulb
         else:
@@ -50,4 +48,4 @@ class Light:
         assert bulb.mac == self._mac
         self.bulb = bulb
         aio.run(self.bulb.updateState())
-        self.connected = True
+        self.is_connected = True

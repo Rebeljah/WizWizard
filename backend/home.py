@@ -1,6 +1,6 @@
 
 import os
-import asyncio as aio
+import asyncio
 
 import pywizlight as pwz
 
@@ -77,7 +77,7 @@ class Home:
         home_data = utils.load_dict_json(filepath)
 
         # get bulb_connected bulbs from LAN
-        available_bulbs: dict[MAC, Bulb] = aio.run(utils.discover_bulbs())
+        available_bulbs: dict[MAC, Bulb] = asyncio.run(utils.discover_bulbs())
         # available_bulbs = {}
 
         # create Home

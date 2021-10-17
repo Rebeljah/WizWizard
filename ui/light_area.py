@@ -40,10 +40,16 @@ class LightButton(ToggleButton):
         self.light = light
         self.text = light.name
 
-        self.bind(state=lambda _, __: self.on_toggle())
+        self.bind(state=lambda _, state: self.on_toggle(state))
 
-    def on_toggle(self):
-        if self.state == 'down':
+    def on_toggle(self, state):
+        """
+        Add or remove self.light from the light_area selected lights on toggle.
+        If the light is not connected, the button stays up ('normal').
+        """
+        if not self.light.is_connected:
+            self.state = 'normal'
+        elif state == 'down':
             self.light_area.selected_lights.add(self.light)
-        elif self.state == 'normal':
+        elif state == 'normal':
             self.light_area.selected_lights.remove(self.light)

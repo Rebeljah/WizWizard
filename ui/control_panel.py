@@ -4,6 +4,7 @@ light selection area. The control panel lets the user send commands to the
 lights which are selected in the root's light_area using the
 LightArea.selected_lights property.
 """
+import asyncio
 
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
@@ -38,33 +39,40 @@ class ControlPanel(GridLayout):
         self.brightness_slider = Slider(
             min=0, max=255
         )
-        self.brightness_slider.bind(value=lambda _, val: command.command_lights(
+        self.brightness_slider.bind(value=lambda _, val: asyncio.create_task(
+            command.command_lights(
                 lights=self.selected_lights,
                 light_command=command.SetBrightness,
                 brightness=val
-            )
+            ))
         )
 
         # build on/off/dim buttons
         self.on_button = Button(
             text='ON',
-            on_release=lambda btn: command.command_lights(
-                lights=self.selected_lights,
-                light_command=command.TurnOnLight)
+            on_release=lambda btn: asyncio.create_task(
+                command.command_lights(
+                    lights=self.selected_lights,
+                    light_command=command.TurnOnLight)
+            )
         )
         self.off_button = Button(
             text='OFF',
-            on_release=lambda btn: command.command_lights(
-                lights=self.selected_lights,
-                light_command=command.TurnOffLight)
+            on_release=lambda btn: asyncio.create_task(
+                command.command_lights(
+                    lights=self.selected_lights,
+                    light_command=command.TurnOffLight)
+            )
         )
 
         self.dim_button = Button(
             text='DIM',
-            on_release=lambda btn: command.command_lights(
-                lights=self.selected_lights,
-                light_command=command.SetBrightness,
-                brightness=1)
+            on_release=lambda btn: asyncio.create_task(
+                command.command_lights(
+                    lights=self.selected_lights,
+                    light_command=command.SetBrightness,
+                    brightness=1)
+            )
         )
 
         # place brightness slider
