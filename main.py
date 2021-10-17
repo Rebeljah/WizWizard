@@ -1,5 +1,4 @@
 import asyncio
-
 from ui.root import WizWizardApp
 
 

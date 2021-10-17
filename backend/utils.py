@@ -14,15 +14,18 @@ MAC = str
 
 async def discover_bulbs(broadcast_space="255.255.255.255") -> dict[MAC, Bulb]:
     """Find lights and return dict with Bulb objects."""
-    entries = await find_wizlights(broadcast_address=broadcast_space)
+    registry_bulbs = await find_wizlights(broadcast_address=broadcast_space)
 
     # empty list for adding bulbs
     bulbs = []
-    for entry in entries:
+    for new_bulb in registry_bulbs:
         try:
-            bulbs.append(Bulb(ip=entry.ip_address, mac=entry.mac_address))
-        except pwz.exceptions.WizLightTimeOutError:
-            pass
+            bulb = Bulb(ip=new_bulb.ip_address, mac=new_bulb.mac_address)
+            bulbs.append(bulb)
+        except pwz.exceptions.WizLightTimeOutError as e:
+            raise Warning(
+                f'{e}: connection timed out for bulb with MAC {new_bulb.mac_address}'
+            )
 
     return {bulb.mac: bulb for bulb in bulbs}
 

@@ -4,7 +4,6 @@ light selection area. The control panel lets the user send commands to the
 lights which are selected in the root's light_area using the
 LightArea.selected_lights property.
 """
-import asyncio
 
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
@@ -80,5 +79,3 @@ class ControlPanel(GridLayout):
         grid.add_widget(self.dim_button)
         grid.add_widget(self.off_button)
         self.add_widget(grid)
-
-

@@ -57,7 +57,7 @@ def command_lights(lights, light_command, **kwargs):
         lights=lights,
         **kwargs
     )
-    asyncio.create_task(run_commands(commands))
+    run_commands(commands)
 
 
 def build_commands(command_class, lights, **kwargs) -> list:
@@ -69,6 +69,6 @@ def build_commands(command_class, lights, **kwargs) -> list:
     return [command_class(light, **kwargs) for light in lights]
 
 
-async def run_commands(commands: Iterable[LightCommand]):
+def run_commands(commands: Iterable[LightCommand]):
     for command in commands:
         asyncio.create_task(command.execute())

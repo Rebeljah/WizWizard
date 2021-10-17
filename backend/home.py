@@ -46,6 +46,24 @@ class Home:
         self.rooms.append(room)
         room.home = self
 
+    async def update_bulbs(self):
+        """Search for bulbs on LAN and connect the bulbs to existing lights
+         with a matching MAC address. Bulbs that are found but do not match an
+         existing light will be added to the home's unassigned room."""
+        bulbs: dict = await utils.discover_bulbs()
+
+        # pop bulbs from dict and add to existing lights
+        for light in self.lights:
+            matched_bulb = bulbs.pop(light.mac, False)
+            if matched_bulb:
+                await light.set_bulb(matched_bulb)
+
+        # add remaining bulbs to home as unassigned
+        for bulb in bulbs.values():
+            light = Light(name=bulb.mac, mac=bulb.mac)
+            await light.set_bulb(bulb)
+            self.unassigned.add_light(light)
+
     def save_to_json(self) -> None:
         """Save as JSON the data required to rebuild this Home"""
         data = {
@@ -76,10 +94,6 @@ class Home:
         filepath = os.path.join('save_data', f"{home_uid}.json")
         home_data = utils.load_dict_json(filepath)
 
-        # get bulb_connected bulbs from LAN
-        available_bulbs: dict[MAC, Bulb] = asyncio.run(utils.discover_bulbs())
-        # available_bulbs = {}
-
         # create Home
         home = Home(home_data['name'], home_data['id'])
 
@@ -93,13 +107,8 @@ class Home:
 
             # add Lights to Room
             for light_info in room_info['lights']:
-                bulb = available_bulbs.pop(light_info['mac'], None)
-                light = Light(light_info['name'], light_info['mac'], bulb)
+                light = Light(light_info['name'], light_info['mac'])
                 room.add_light(light)
 
-        # create lights from any remaining bulbs and add to the unassigned room
-        for bulb in available_bulbs.values():
-            light = Light(name=bulb.mac, mac=bulb.mac, bulb=bulb)
-            home.unassigned.add_light(light)
-
+        asyncio.run(home.update_bulbs())
         return home
