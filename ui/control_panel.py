@@ -39,39 +39,35 @@ class ControlPanel(GridLayout):
         self.brightness_slider = Slider(
             min=0, max=255
         )
-        self.brightness_slider.bind(value=lambda _, val: asyncio.create_task(
-            command.command_lights(
+        self.brightness_slider.bind(value=lambda _, val: command.command_lights(
                 lights=self.selected_lights,
                 light_command=command.SetBrightness,
                 brightness=val
-            ))
+            )
         )
 
         # build on/off/dim buttons
         self.on_button = Button(
             text='ON',
-            on_release=lambda btn: asyncio.create_task(
-                command.command_lights(
+            on_release=lambda btn: command.command_lights(
                     lights=self.selected_lights,
-                    light_command=command.TurnOnLight)
+                    light_command=command.TurnOnLight
             )
         )
         self.off_button = Button(
             text='OFF',
-            on_release=lambda btn: asyncio.create_task(
-                command.command_lights(
+            on_release=lambda btn: command.command_lights(
                     lights=self.selected_lights,
-                    light_command=command.TurnOffLight)
+                    light_command=command.TurnOffLight
             )
         )
 
         self.dim_button = Button(
             text='DIM',
-            on_release=lambda btn: asyncio.create_task(
-                command.command_lights(
+            on_release=lambda btn: command.command_lights(
                     lights=self.selected_lights,
                     light_command=command.SetBrightness,
-                    brightness=1)
+                    brightness=1
             )
         )
 

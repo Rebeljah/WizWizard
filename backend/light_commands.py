@@ -1,3 +1,4 @@
+import asyncio
 from abc import ABC, abstractmethod
 from typing import Iterable
 from pywizlight import PilotBuilder
@@ -49,14 +50,14 @@ class SetBrightness(LightCommand):
         )
 
 
-async def command_lights(lights, light_command, **kwargs):
+def command_lights(lights, light_command, **kwargs):
     """Build the command for each selected light and run the commands"""
     commands = build_commands(
         command_class=light_command,
         lights=lights,
         **kwargs
     )
-    await run_commands(commands)
+    asyncio.create_task(run_commands(commands))
 
 
 def build_commands(command_class, lights, **kwargs) -> list:
@@ -70,4 +71,4 @@ def build_commands(command_class, lights, **kwargs) -> list:
 
 async def run_commands(commands: Iterable[LightCommand]):
     for command in commands:
-        await command.execute()
+        asyncio.create_task(command.execute())

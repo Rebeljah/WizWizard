@@ -49,22 +49,22 @@ class Home:
     def save_to_json(self) -> None:
         """Save as JSON the data required to rebuild this Home"""
         data = {
-                    "name": self.name,
-                    "id": self.id,
-                    "rooms": [
+            "name": self.name,
+            "id": self.id,
+            "rooms": [
+                {
+                    "name": room.name,
+                    "type": room.type,
+                    "id": room.id,
+                    "lights": [
                         {
-                            "name": room.name,
-                            "type": room.type,
-                            "id": room.id,
-                            "lights": [
-                                {
-                                    "name": light.name,
-                                    "mac": light.mac
-                                } for light in room.lights
-                            ]
-                        } for room in self.rooms
+                            "name": light.name,
+                            "mac": light.mac
+                        } for light in room.lights
                     ]
-                }
+                } for room in self.rooms
+            ]
+        }
 
         filepath = os.path.join('save_data', f"{self.id}.json")
         utils.save_dict_json(data, filepath, indent=4)
