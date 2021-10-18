@@ -54,14 +54,14 @@ class Home:
 
         # pop bulbs from dict and add to existing lights
         for light in self.lights:
-            matched_bulb = bulbs.pop(light.mac, False)
-            if matched_bulb:
-                await light.set_bulb(matched_bulb)
+            bulb = bulbs.pop(light.mac, False)
+            if bulb:
+                asyncio.create_task(light.set_bulb(bulb))
 
         # add remaining bulbs to home as unassigned
         for bulb in bulbs.values():
             light = Light(name=bulb.mac, mac=bulb.mac)
-            await light.set_bulb(bulb)
+            asyncio.create_task(light.set_bulb(bulb))
             self.unassigned.add_light(light)
 
     def save_to_json(self) -> None:
@@ -88,7 +88,7 @@ class Home:
         utils.save_dict_json(data, filepath, indent=4)
 
     @classmethod
-    def from_save(cls, home_uid: str):
+    async def from_save(cls, home_uid: str):
         """Load then parse home_model data from JSON and return a Home instance"""
 
         filepath = os.path.join('save_data', f"{home_uid}.json")
@@ -110,5 +110,6 @@ class Home:
                 light = Light(light_info['name'], light_info['mac'])
                 room.add_light(light)
 
-        asyncio.run(home.update_bulbs())
+        await home.update_bulbs()
+
         return home

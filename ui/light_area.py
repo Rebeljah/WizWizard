@@ -29,6 +29,7 @@ class LightArea(GridLayout):
     def set_lights(self, lights: Iterable[Light]):
         """Set the lights and add them to selected lights by default"""
         self.lights = list(lights)
+        self.selected_lights.clear()
         self.build()
 
 
