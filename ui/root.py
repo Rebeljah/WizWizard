@@ -42,9 +42,9 @@ class RootGridLayout(GridLayout):
 
 class WizWizardApp(App):
     """Main app to launch UI"""
-    def __init__(self, **kwargs):
+    def __init__(self, home, **kwargs):
         super().__init__(**kwargs)
-        self.home = Home.from_save('0000000')
+        self.home = home
 
         # main content root
         self.root = RootGridLayout(self)
