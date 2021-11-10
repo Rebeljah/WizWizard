@@ -1,20 +1,17 @@
 """
 Module to contain code for lights and light groups for controlling lights in rooms
 """
-import pywizlight as pwz
+from pywizlight import wizlight as Wizlight
 from pywizlight import PilotBuilder, PilotParser
 import asyncio as aio
 
-from typing import Union, Iterable, Callable
-from abc import ABC, abstractmethod
-
-from backend.bulb import Bulb
+from typing import Union
 
 
 class Light:
     # TODO add light type names as a class var like the room class
     """Class to represent a light object that controls a real bulb"""
-    def __init__(self, name: str, mac: str, bulb: Union[Bulb, None]):
+    def __init__(self, name: str, mac: str, bulb: Union[Wizlight, None]):
         # parent
         self.room = None
 
@@ -45,7 +42,7 @@ class Light:
         """Check if the light is turned on"""
         return self.bulb.status
 
-    def set_bulb(self, bulb: Bulb) -> None:
+    def set_bulb(self, bulb: Wizlight) -> None:
         """attach a bulb to this light, the MAC address must match"""
         assert bulb.mac == self._mac
         self.bulb = bulb

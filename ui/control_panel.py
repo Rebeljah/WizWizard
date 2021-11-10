@@ -76,5 +76,3 @@ class ControlPanel(GridLayout):
         grid.add_widget(self.dim_button)
         grid.add_widget(self.off_button)
         self.add_widget(grid)
-
-

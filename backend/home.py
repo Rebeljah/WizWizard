@@ -2,7 +2,8 @@
 import os
 import asyncio as aio
 
-import pywizlight as pwz
+from pywizlight import wizlight as Wizlight
+from pywizlight.discovery import discover_lights
 
 from backend.room import Room
 from backend.light import Light
@@ -12,7 +13,6 @@ from backend import utils
 from typing import Iterator, Optional
 Rooms = list[Room]
 Lights = list[Light]
-Bulb = pwz.wizlight
 MAC = str
 
 
@@ -77,8 +77,8 @@ class Home:
         home_data = utils.load_dict_json(filepath)
 
         # get bulb_connected bulbs from LAN
-        available_bulbs: dict[MAC, Bulb] = aio.run(utils.discover_bulbs())
-        # available_bulbs = {}
+        bulbs: list = aio.run(discover_lights('192.168.1.255'))
+        bulbs: dict[MAC, Wizlight] = {bulb.mac: bulb for bulb in bulbs}
 
         # create Home
         home = Home(home_data['name'], home_data['id'])
@@ -93,12 +93,14 @@ class Home:
 
             # add Lights to Room
             for light_info in room_info['lights']:
-                bulb = available_bulbs.pop(light_info['mac'], None)
-                light = Light(light_info['name'], light_info['mac'], bulb)
+                mac = light_info['mac']
+                name = light_info['name']
+                bulb = bulbs.pop(mac, None)
+                light = Light(name, mac, bulb)
                 room.add_light(light)
 
         # create lights from any remaining bulbs and add to the unassigned room
-        for bulb in available_bulbs.values():
+        for bulb in bulbs.values():
             light = Light(name=bulb.mac, mac=bulb.mac, bulb=bulb)
             home.unassigned.add_light(light)
 

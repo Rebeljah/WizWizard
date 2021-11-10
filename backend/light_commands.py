@@ -1,9 +1,8 @@
-from abc import ABC, abstractmethod
-from typing import Iterable
+
 import asyncio
 from pywizlight import PilotBuilder
-import asyncio
-
+from abc import ABC, abstractmethod
+from typing import Iterable
 
 from backend.light import Light
 

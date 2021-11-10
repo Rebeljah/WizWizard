@@ -6,25 +6,8 @@ import os
 import random
 import string
 
-from backend.bulb import Bulb
-
 # typing
 MAC = str
-
-
-async def discover_bulbs(broadcast_space="255.255.255.255") -> dict[MAC, Bulb]:
-    """Find lights and return dict with Bulb objects."""
-    entries = await find_wizlights(broadcast_address=broadcast_space)
-
-    # empty list for adding bulbs
-    bulbs = []
-    for entry in entries:
-        try:
-            bulbs.append(Bulb(ip=entry.ip_address, mac=entry.mac_address))
-        except pwz.exceptions.WizLightTimeOutError:
-            pass
-
-    return {bulb.mac: bulb for bulb in bulbs}
 
 
 def save_dict_json(data: dict, filepath, indent: int = 4) -> None:
