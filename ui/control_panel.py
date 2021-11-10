@@ -49,22 +49,25 @@ class ControlPanel(GridLayout):
         self.on_button = Button(
             text='ON',
             on_release=lambda btn: command.command_lights(
-                lights=self.selected_lights,
-                light_command=command.TurnOnLight)
+                    lights=self.selected_lights,
+                    light_command=command.TurnOnLight
+            )
         )
         self.off_button = Button(
             text='OFF',
             on_release=lambda btn: command.command_lights(
-                lights=self.selected_lights,
-                light_command=command.TurnOffLight)
+                    lights=self.selected_lights,
+                    light_command=command.TurnOffLight
+            )
         )
 
         self.dim_button = Button(
             text='DIM',
             on_release=lambda btn: command.command_lights(
-                lights=self.selected_lights,
-                light_command=command.SetBrightness,
-                brightness=1)
+                    lights=self.selected_lights,
+                    light_command=command.SetBrightness,
+                    brightness=1
+            )
         )
 
         # place brightness slider

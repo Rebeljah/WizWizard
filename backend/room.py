@@ -34,7 +34,7 @@ class Room:
 
     def add_light(self, light):
         """Add the light to this room"""
-        if light.room is not None:
+        if light.room:
             light.room.lights.remove(light)
         light.room = self
         self.lights.append(light)

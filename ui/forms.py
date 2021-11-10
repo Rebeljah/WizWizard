@@ -4,7 +4,6 @@ Class to hold different forms. Forms inherit from the kivy ModalView class and
 """
 
 from kivy.app import App
-
 from kivy.uix.modalview import ModalView
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
@@ -181,12 +180,13 @@ class AddLightForm(FormABC):
 
     def _do_form_actions(self):
         light = self.light_dropdown.selected_value
-        light.name = self.light_name.text
-
         room = self.room_dropdown.selected_value
 
+        light.name = self.light_name.text
         room.add_light(light)
-        App.get_running_app().on_edit_home()
+
+        app = App.get_running_app()
+        app.on_edit_home()
 
 
 class ItemDropDown(DropDown):

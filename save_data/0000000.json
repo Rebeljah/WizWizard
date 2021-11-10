@@ -8,7 +8,7 @@
             "id": "9431062",
             "lights": [
                 {
-                    "name": "Tube lamp",
+                    "name": "Tube",
                     "mac": "a8bb50cf597b"
                 }
             ]
@@ -25,6 +25,10 @@
                 {
                     "name": "Dual2",
                     "mac": "a8bb50c5c646"
+                },
+                {
+                    "name": "Corner",
+                    "mac": "a8bb50cf0f3b"
                 }
             ]
         },
@@ -52,6 +56,21 @@
                 {
                     "name": "KL5",
                     "mac": "6c299024f1f7"
+                }
+            ]
+        },
+        {
+            "name": "Back bed",
+            "type": "bedroom",
+            "id": "0178392",
+            "lights": [
+                {
+                    "name": "Dual1",
+                    "mac": "a8bb50d0178a"
+                },
+                {
+                    "name": "Dual2",
+                    "mac": "a8bb50c415a9"
                 }
             ]
         }
