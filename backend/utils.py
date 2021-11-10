@@ -6,28 +6,8 @@ import os
 import random
 import string
 
-from backend.bulb import Bulb
-
 # typing
 MAC = str
-
-
-async def discover_bulbs(broadcast_space="255.255.255.255") -> dict[MAC, Bulb]:
-    """Find lights and return dict with Bulb objects."""
-    registry_bulbs = await find_wizlights(broadcast_address=broadcast_space)
-
-    # empty list for adding bulbs
-    bulbs = []
-    for new_bulb in registry_bulbs:
-        try:
-            bulb = Bulb(ip=new_bulb.ip_address, mac=new_bulb.mac_address)
-            bulbs.append(bulb)
-        except pwz.exceptions.WizLightTimeOutError as e:
-            raise Warning(
-                f'{e}: connection timed out for bulb with MAC {new_bulb.mac_address}'
-            )
-
-    return {bulb.mac: bulb for bulb in bulbs}
 
 
 def save_dict_json(data: dict, filepath, indent: int = 4) -> None:
