@@ -100,8 +100,8 @@ class Home:
                 room.add_light(light)
 
         # create lights from any remaining bulbs and add to the unassigned room
-        for bulb in bulbs.values():
-            light = Light(name=bulb.mac, mac=bulb.mac, bulb=bulb)
+        for i, bulb in enumerate(bulbs.values(), 1):
+            light = Light(name=f"Bulb_{i}", mac=bulb.mac, bulb=bulb)
             home.unassigned.add_light(light)
 
         return home
