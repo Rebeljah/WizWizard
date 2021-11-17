@@ -1,3 +1,5 @@
+"""Observer  that allows the backend to subscribe to UI events and vica-versa"""
+
 
 from typing import Callable
 EventName = str

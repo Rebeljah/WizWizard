@@ -1,2 +1,2 @@
-from . import observer
-events = observer.Observer()
+from observer.observer import Observer
+events = Observer()

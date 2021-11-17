@@ -2,10 +2,10 @@
 Module to contain code for lights and light groups for controlling lights in rooms
 """
 import asyncio
-
 from pywizlight import wizlight as Wizlight
 
-from backend import events
+from . import events
+
 
 from typing import Optional
 

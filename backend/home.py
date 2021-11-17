@@ -5,6 +5,7 @@ from . import utils, events
 from .room import Room
 from .light import Light
 
+
 from typing import Iterator, Optional
 MAC = str
 
