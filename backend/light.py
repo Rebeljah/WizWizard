@@ -1,17 +1,19 @@
 """
 Module to contain code for lights and light groups for controlling lights in rooms
 """
-from pywizlight import wizlight as Wizlight
-from pywizlight import PilotParser
-import asyncio as aio
+import asyncio
 
-from typing import Union
+from pywizlight import wizlight as Wizlight
+
+from backend import events
+
+from typing import Optional
 
 
 class Light:
     # TODO add light type names as a class var like the room class
     """Class to represent a light object that controls a real bulb"""
-    def __init__(self, name: str, mac: str, bulb: Wizlight):
+    def __init__(self, name: str, mac: str, bulb: Optional[Wizlight] = None):
         # parent
         self.room = None
 
@@ -19,8 +21,11 @@ class Light:
         self._mac = mac  # read only, use mac property
         self.name = name
 
-        # bulb controller
-        self.bulb: Wizlight = self.set_bulb(bulb)
+        # set bulb now if it was passed
+        if bulb is None:
+            self.bulb = None
+        else:
+            asyncio.create_task(self.set_bulb(bulb))
 
     @property
     def mac(self) -> str:
@@ -30,17 +35,19 @@ class Light:
     def brightness(self) -> int:
         """return current brightness 0-255"""
         if self.bulb:
-            state: PilotParser = aio.run(self.bulb.updateState())
-            return state.get_brightness()
+            return self.bulb.state.get_brightness()
 
     @property
     def is_on(self) -> bool:
         """Check if the light is turned on"""
-        return self.bulb.status
+        if self.bulb:
+            return self.bulb.status
+        else:
+            return False
 
-    def set_bulb(self, bulb: Wizlight) -> Wizlight:
+    async def set_bulb(self, bulb: Wizlight):
         """Attach a matching bulb to this light. """
         assert bulb.mac == self._mac
-        aio.run(bulb.updateState())
+        await bulb.updateState()
         self.bulb = bulb
-        return self.bulb
+        events.publish('set_bulb', self)

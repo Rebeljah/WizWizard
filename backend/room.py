@@ -1,7 +1,8 @@
-from typing import Optional as Opt
-
 from backend.light import Light
 from backend.utils import create_uid
+from backend import events
+
+from typing import Optional as Opt
 
 
 class Room:
@@ -12,12 +13,10 @@ class Room:
     )
 
     def __init__(self, room_name: str, room_type: str, room_id: Opt[str] = ''):
-        # parent
+        # parent and children
         self.home = None
-        # children
-        self.lights: list[Light] = []
+        self.lights = set()
 
-        # set or generate uid
         if room_id:
             self._id = room_id
         else:
@@ -37,4 +36,5 @@ class Room:
         if light.room:
             light.room.lights.remove(light)
         light.room = self
-        self.lights.append(light)
+        self.lights.add(light)
+        events.publish('add_light', light)
