@@ -11,10 +11,6 @@ class Observer:
     def __init__(self):
         self.events: SubscriberDict = {}
 
-        self.event_names = ['add_room', 'add_light', 'set_bulb']
-        for event_name in self.event_names:
-            self.add_event(event_name)
-
     def subscribe(self, event_name, callback):
         """Add the subscribing callback to the set of subscribers"""
         event_subscribers: set = self.events[event_name]
@@ -31,7 +27,7 @@ class Observer:
         for callback in event_subscribers:
             callback(*callback_args)
 
-    def add_event(self, event_name):
+    def add_event_name(self, event_name):
         """Add event name to events dict"""
         assert event_name not in self.events
         self.events.update({event_name: set()})

@@ -2,6 +2,7 @@ import tkinter as tk
 import asyncio
 
 from .rooms import RoomTabs
+from .controls import ControlPanel
 from backend.home import Home
 
 
@@ -13,7 +14,9 @@ class TkRoot(tk.Tk):
 
         # build
         self.room_tabs = RoomTabs(self)
-        self.room_tabs.pack()
+        self.room_tabs.grid()
+        self.control_panel = ControlPanel(self)
+        self.control_panel.grid()
 
         # load home
         self.home_model = Home.from_save('0000000')

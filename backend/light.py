@@ -50,4 +50,4 @@ class Light:
         assert bulb.mac == self._mac
         await bulb.updateState()
         self.bulb = bulb
-        events.publish('set_bulb', self)
+        events.publish('update_light', self)
