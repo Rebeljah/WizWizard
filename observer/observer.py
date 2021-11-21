@@ -23,6 +23,7 @@ class Observer:
 
     def publish(self, event_name, *callback_args):
         """Publish arguments to any callbacks subscribing to the event_name"""
+        # TODO Make this somehow stop publishing to objects that don't care
         event_subscribers: set = self.events[event_name]
         for callback in event_subscribers:
             callback(*callback_args)
