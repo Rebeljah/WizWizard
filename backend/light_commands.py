@@ -4,7 +4,7 @@ from pywizlight import PilotBuilder
 from abc import ABC, abstractmethod
 from typing import Iterable, Type
 
-from backend.light import Light
+from .light import Light
 
 
 class LightCommand(ABC):
@@ -50,25 +50,23 @@ class SetBrightness(LightCommand):
         )
 
 
-def command_lights(lights, command_class: Type[LightCommand], **kwargs):
+def command_lights(lights, command: Type[LightCommand], **kwargs):
     """Build the command for each selected light and run the commands"""
-    if not issubclass(command_class, LightCommand):
-        raise TypeError(f'{command_class} is not a subclass of {LightCommand}')
+    if not issubclass(command, LightCommand):
+        raise TypeError(f'{command} is not a subclass of {LightCommand}')
 
     commands = build_commands(
-        lights=lights,
-        command_class=command_class,
-        **kwargs
+        lights=lights, command=command, **kwargs
     )
-    asyncio.run(run_commands(commands))
+    run_commands(commands)
 
 
-def build_commands(lights, command_class: Type[LightCommand], **kwargs) -> list:
+def build_commands(lights, command: Type[LightCommand], **kwargs) -> list:
     """Instantiate the given command class with each light. Returns a list of
     commands that are concrete LightCommand instances."""
-    return [command_class(light, **kwargs) for light in lights]
+    return [command(light, **kwargs) for light in lights]
 
 
-async def run_commands(commands: Iterable[LightCommand]):
+def run_commands(commands: Iterable[LightCommand]):
     for command in commands:
-        await command.execute()
+        asyncio.create_task(command.execute())

@@ -9,29 +9,28 @@ SubscriberDict = dict[EventName, set[Callable]]
 class Observer:
     """Observer that runs subscribing callbacks when events are published"""
     def __init__(self):
-        self.events: SubscriberDict = {}
+        self.subscriber_dict: SubscriberDict = {}
 
     def subscribe(self, event_name, callback):
         """Add the subscribing callback to the set of subscribers"""
-        event_subscribers: set = self.events[event_name]
-        event_subscribers.add(callback)
+        subscribers: set = self.subscriber_dict[event_name]
+        subscribers.add(callback)
 
     def unsubscribe(self, event_name, callback):
         """remove the callback from the subscribers"""
-        event_subscribers: set = self.events[event_name]
-        event_subscribers.remove(callback)
+        subscribers: set = self.subscriber_dict[event_name]
+        subscribers.remove(callback)
 
-    def publish(self, event_name, *callback_args):
+    def publish(self, event_name, *args):
         """Publish arguments to any callbacks subscribing to the event_name"""
-        # TODO Make this somehow stop publishing to objects that don't care
-        event_subscribers: set = self.events[event_name]
-        for callback in event_subscribers:
-            callback(*callback_args)
+        subscribers: set = self.subscriber_dict[event_name]
+        for callback in subscribers:
+            callback(*args)
 
     def add_event_name(self, event_name):
         """Add event name to events dict"""
-        assert event_name not in self.events
-        self.events.update({event_name: set()})
+        assert event_name not in self.subscriber_dict
+        self.subscriber_dict.update({event_name: set()})
 
     def del_event(self, event_name):
-        del self.events[event_name]
+        del self.subscriber_dict[event_name]
