@@ -1,8 +1,6 @@
-from ui.root import WizWizardApp
-from backend.home import Home
+from ui.root import TkRoot
 
 
 if __name__ == '__main__':
-    home = Home.from_save("0000000")
-    app = WizWizardApp(home)
+    app = TkRoot()
     app.run()

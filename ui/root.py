@@ -1,58 +1,41 @@
+import tkinter as tk
+from tkinter import ttk
+import asyncio
 
-from kivy.app import App
-from kivy.uix.gridlayout import GridLayout
-
+from .rooms import RoomTabs
+from .controls import ControlPanel
 from backend.home import Home
-from ui.navbar import Navbar
-from ui.light_area import LightArea
-from ui.control_panel import ControlPanel
 
 
-class RootGridLayout(GridLayout):
-    def __init__(self, app, **kwargs):
-        super().__init__(**kwargs)
-        self.app = app
+class TkRoot(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title('WizWizard')
+        self.protocol("WM_DELETE_WINDOW", self.close)
+        self.loop = None  # set when run() is called
 
-        self.rows = 3
+        # build
+        self.room_tabs = RoomTabs(self)
+        self.room_tabs.pack(fill='both', expand=True)
+        self.control_panel = ControlPanel(self)
+        self.control_panel.pack(fill='both', side='bottom')
 
-        self.navbar = Navbar
-        self.light_area = LightArea
-        self.control_panel = ControlPanel
-        self.build()
+        # load home
+        self.home_model = Home.from_save('0000000')
 
-    def build(self):
-        self.clear_widgets()
+    def run(self):
+        async def tkinter_loop():
+            while True:
+                self.update()
+                await asyncio.sleep(1/60)
 
-        # add top navbar
-        self.navbar = Navbar()
-        self.add_widget(self.navbar)
+        self.loop = asyncio.new_event_loop()
 
-        # add light selection area
-        self.light_area = LightArea()
-        self.add_widget(self.light_area)
+        self.loop.create_task(tkinter_loop())
+        self.loop.create_task(self.home_model.update_lights())
 
-        # add control panel
-        self.control_panel = ControlPanel(self.light_area.selected_lights)
-        self.add_widget(self.control_panel)
+        self.loop.run_forever()
 
-    def set_shown_lights(self, lights):
-        """Set the lights show in the light area"""
-        self.light_area.set_lights(lights)
-
-
-class WizWizardApp(App):
-    """Main app to launch UI"""
-    def __init__(self, home, **kwargs):
-        super().__init__(**kwargs)
-        self.home = home
-
-        # main content root
-        self.root = RootGridLayout(self)
-
-    def build(self):
-        return self.root
-
-    def on_edit_home(self) -> None:
-        """save home data and refresh UI"""
-        self.home.save_to_json()
-        self.root.build()
+    def close(self):
+        self.loop.stop()
+        self.destroy()

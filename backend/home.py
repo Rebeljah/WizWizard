@@ -1,18 +1,12 @@
-
 import os
-import asyncio as aio
-
-from pywizlight import wizlight as Wizlight
 from pywizlight.discovery import discover_lights
 
-from backend.room import Room
-from backend.light import Light
-from backend import utils
+from . import utils, events
+from .room import Room
+from .light import Light
 
-# typing
+
 from typing import Iterator, Optional
-Rooms = list[Room]
-Lights = list[Light]
 MAC = str
 
 
@@ -22,13 +16,11 @@ class Home:
     contains lights.
     """
     def __init__(self, home_name: str, home_id: Optional[str] = ''):
-
         self._id = home_id if home_id else utils.create_uid(7)
         self.name = home_name
 
-        self.rooms: Rooms = []
-        # room to hold any lights not claimed during loading
-        self.unassigned: Room = Room('Unassigned', 'bedroom')
+        self.rooms = []
+        self.unassigned_lights = []
 
     @property
     def id(self) -> str:
@@ -37,14 +29,37 @@ class Home:
 
     @property
     def lights(self) -> Iterator[Light]:
-        """Gather and return all Lights from rooms in home_model"""
+        """Iterate over lights in the home"""
         for room in self.rooms:
             for light in room.lights:
                 yield light
 
+        for light in self.unassigned_lights:
+            yield light
+
     def add_room(self, room: Room) -> None:
         self.rooms.append(room)
         room.home = self
+        events.publish('add_room', room)
+
+    async def update_lights(self):
+        """Find bulbs and attach them to lights"""
+        # get bulb_connected bulbs from LAN
+        bulbs = await discover_lights('192.168.1.255')
+        bulbs = {bulb.mac: bulb for bulb in bulbs}
+
+        for room in self.rooms:
+            for light in room.lights:
+                bulb = bulbs.get(light.mac, None)
+                if bulb:
+                    await light.set_bulb(bulb)
+
+        # create lights from any remaining bulbs and add to the unassigned room
+        self.unassigned_lights = []
+        leftover_bulbs = bulbs.values()
+        for i, bulb in enumerate(leftover_bulbs, 1):
+            light = Light(name=f"Bulb_{i}", mac=bulb.mac, bulb=bulb)
+            self.unassigned_lights.append(light)
 
     def save_to_json(self) -> None:
         """Save as JSON the data required to rebuild this Home"""
@@ -76,32 +91,20 @@ class Home:
         filepath = os.path.join('save_data', f"{home_uid}.json")
         home_data = utils.load_dict_json(filepath)
 
-        # get bulb_connected bulbs from LAN
-        bulbs: list = aio.run(discover_lights('192.168.1.255'))
-        bulbs: dict[MAC, Wizlight] = {bulb.mac: bulb for bulb in bulbs}
-
         # create Home
         home = Home(home_data['name'], home_data['id'])
 
         # add Rooms and Lights to Home
-        for room_info in home_data['rooms']:
+        for room_data in home_data['rooms']:
             # create Room
             room = Room(
-                room_info['name'], room_info['type'], room_info['id']
+                room_data['name'], room_data['type'], room_data['id']
             )
             home.add_room(room)
 
             # add Lights to Room
-            for light_info in room_info['lights']:
-                mac = light_info['mac']
-                name = light_info['name']
-                bulb = bulbs.pop(mac, None)
-                light = Light(name, mac, bulb)
+            for light_data in room_data['lights']:
+                light = Light(light_data['name'], light_data['mac'])
                 room.add_light(light)
-
-        # create lights from any remaining bulbs and add to the unassigned room
-        for bulb in bulbs.values():
-            light = Light(name=bulb.mac, mac=bulb.mac, bulb=bulb)
-            home.unassigned.add_light(light)
 
         return home
