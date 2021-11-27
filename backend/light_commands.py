@@ -6,6 +6,8 @@ from typing import Iterable, Type
 
 from .light import Light
 
+Kelvin = int
+
 
 class LightCommand(ABC):
     """A command that can be run asynchronously"""
@@ -39,6 +41,7 @@ class SetBrightness(LightCommand):
     def __init__(self, light, brightness):
         super().__init__(light)
 
+        brightness = int(brightness)
         if not (0 <= brightness <= 255):
             raise ValueError(f'brightness ({brightness}) not in range 0-255')
 
@@ -47,6 +50,23 @@ class SetBrightness(LightCommand):
     async def execute(self):
         await self.light.bulb.turn_on(
             PilotBuilder(brightness=self.brightness)
+        )
+
+
+class SetTemperature(LightCommand):
+    """Set light brightness from 0-255"""
+    def __init__(self, light, temperature: Kelvin):
+        super().__init__(light)
+
+        temperature = int(temperature)
+        if not (1000 <= temperature <= 10000):
+            raise ValueError(f'Invalid temperature: {temperature}K')
+
+        self.temperature: Kelvin = temperature
+
+    async def execute(self):
+        await self.light.bulb.turn_on(
+            PilotBuilder(colortemp=self.temperature)
         )
 
 

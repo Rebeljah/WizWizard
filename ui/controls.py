@@ -1,10 +1,13 @@
 """A control panel that controls selected lights in a room"""
 
+from tkinter import colorchooser
 from tkinter import ttk
 from typing import Type
+from abc import ABC, abstractmethod
 
-from backend.light import Light
-import backend.light_commands as commands
+from backend.light_commands import (
+    command_lights, TurnOnLight, TurnOffLight, SetBrightness, SetTemperature
+)
 from . import events
 
 
@@ -15,28 +18,70 @@ class ControlPanel(ttk.Labelframe):
         events.subscribe('set_controlled_lights', self.set_controlled_lights)
 
         self.controlled_lights = set()
+        self._build_widgets()
 
-        # debug
-        ttk.Button(self, text='Theme').pack(fill='x', padx=30, pady=3)
+    def _build_widgets(self):
+        brightness_frame = ttk.Labelframe(self, text='brightness')
+        BrightnessSlider(self, brightness_frame).pack(fill='x')
+        brightness_frame.pack(fill='x', padx=40)
 
-        LabeledSlider(self, text='brightness').pack(fill='x', padx=30, pady=3)
-        LabeledSlider(self, text='temperature', to=128).pack(fill='x', padx=30, pady=3)
+        temperature_frame = ttk.Labelframe(self, text='temeperature (K)')
+        TemperatureSlider(self, temperature_frame).pack(fill='x')
+        temperature_frame.pack(fill='x', padx=40)
 
-        ttk.Button(self, text='On').pack(fill='x', padx=30, pady=3)
-        ttk.Button(self, text='Dim').pack(fill='x', padx=30, pady=3)
-        ttk.Button(self, text='Off').pack(fill='x', padx=30, pady=3)
+        # On/Off buttons
+        on_off_frame = ttk.Frame(self)
+        OnButton(self, on_off_frame).pack(side='left')
+        OffButton(self, on_off_frame).pack(side='left')
+        on_off_frame.pack()
 
     def set_controlled_lights(self, lights: set):
         self.controlled_lights = lights
 
-    def command_lights(self, command: Type[commands.LightCommand]):
-        commands.command_lights(self.controlled_lights, command)
+
+class OnButton(ttk.Button):
+    def __init__(self, panel: ControlPanel, parent):
+        super().__init__(parent)
+        self.panel = panel
+        self.config(command=self._on_press)
+        self.config(text='On')
+
+    def _on_press(self):
+        lights = self.panel.controlled_lights
+        command_lights(lights, TurnOnLight)
 
 
-class LabeledSlider(ttk.Labelframe):
-    def __init__(self, parent, text, to=255):
-        super().__init__(parent, text=text)
+class OffButton(ttk.Button):
+    def __init__(self, panel: ControlPanel, parent):
+        super().__init__(parent)
+        self.panel = panel
+        self.config(command=self._on_press)
+        self.config(text='Off')
 
-        # add slider
-        self.scale = ttk.LabeledScale(self, to=to)
-        self.scale.pack(fill='both')
+    def _on_press(self):
+        lights = self.panel.controlled_lights
+        command_lights(lights, TurnOffLight)
+
+
+class BrightnessSlider(ttk.Scale):
+    def __init__(self, panel: ControlPanel, parent):
+        super().__init__(parent)
+        self.panel = panel
+        self.config(command=self._on_value_change)
+        self.config(to=255)
+
+    def _on_value_change(self, _):
+        lights = self.panel.controlled_lights
+        command_lights(lights, SetBrightness, brightness=self.get())
+
+
+class TemperatureSlider(ttk.Scale):
+    def __init__(self, panel: ControlPanel, parent):
+        super().__init__(parent)
+        self.panel = panel
+        self.config(command=self._on_value_change)
+        self.config(from_=1_000, to=10_000)  # Kelvin
+
+    def _on_value_change(self, _):
+        lights = self.panel.controlled_lights
+        command_lights(lights, SetTemperature, temperature=self.get())
