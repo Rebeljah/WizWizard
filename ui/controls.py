@@ -6,7 +6,7 @@ from typing import Type
 from abc import ABC, abstractmethod
 
 from backend.light_commands import (
-    command_lights, TurnOnLight, TurnOffLight, SetBrightness, SetTemperature
+    LightCommander, TurnOnLight, TurnOffLight, SetBrightness, SetTemperature
 )
 from . import events
 
@@ -18,6 +18,8 @@ class ControlPanel(ttk.Labelframe):
         events.subscribe('set_controlled_lights', self.set_controlled_lights)
 
         self.controlled_lights = set()
+        self.commander = LightCommander(commands_per_second=9)
+
         self._build_widgets()
 
     def _build_widgets(self):
@@ -38,6 +40,9 @@ class ControlPanel(ttk.Labelframe):
     def set_controlled_lights(self, lights: set):
         self.controlled_lights = lights
 
+    def command_lights(self, command: Type, **kwargs):
+        self.commander.command_lights(self.controlled_lights, command, **kwargs)
+
 
 class OnButton(ttk.Button):
     def __init__(self, panel: ControlPanel, parent):
@@ -47,8 +52,7 @@ class OnButton(ttk.Button):
         self.config(text='On')
 
     def _on_press(self):
-        lights = self.panel.controlled_lights
-        command_lights(lights, TurnOnLight)
+        self.panel.command_lights(TurnOnLight)
 
 
 class OffButton(ttk.Button):
@@ -59,8 +63,7 @@ class OffButton(ttk.Button):
         self.config(text='Off')
 
     def _on_press(self):
-        lights = self.panel.controlled_lights
-        command_lights(lights, TurnOffLight)
+        self.panel.command_lights(TurnOffLight)
 
 
 class BrightnessSlider(ttk.Scale):
@@ -71,8 +74,7 @@ class BrightnessSlider(ttk.Scale):
         self.config(to=255)
 
     def _on_value_change(self, _):
-        lights = self.panel.controlled_lights
-        command_lights(lights, SetBrightness, brightness=self.get())
+        self.panel.command_lights(SetBrightness, brightness=self.scale.get())
 
 
 class TemperatureSlider(ttk.Scale):
@@ -83,5 +85,4 @@ class TemperatureSlider(ttk.Scale):
         self.config(from_=1_000, to=10_000)  # Kelvin
 
     def _on_value_change(self, _):
-        lights = self.panel.controlled_lights
-        command_lights(lights, SetTemperature, temperature=self.get())
+        self.panel.command_lights(SetTemperature, temperature=self.scale.get())
