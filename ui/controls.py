@@ -6,7 +6,7 @@ from typing import Type
 from abc import ABC, abstractmethod
 
 from backend.light_commands import (
-    LightCommander, TurnOnLight, TurnOffLight, SetBrightness, SetTemperature
+    command_lights, TurnOnLight, TurnOffLight, SetBrightness, SetTemperature
 )
 from . import events
 
@@ -18,7 +18,6 @@ class ControlPanel(ttk.Labelframe):
         events.subscribe('set_controlled_lights', self.set_controlled_lights)
 
         self.controlled_lights = set()
-        self.commander = LightCommander(commands_per_second=9)
 
         self._build_widgets()
 
@@ -41,7 +40,7 @@ class ControlPanel(ttk.Labelframe):
         self.controlled_lights = lights
 
     def command_lights(self, command: Type, **kwargs):
-        self.commander.command_lights(self.controlled_lights, command, **kwargs)
+        command_lights(self.controlled_lights, command, **kwargs)
 
 
 class OnButton(ttk.Button):
