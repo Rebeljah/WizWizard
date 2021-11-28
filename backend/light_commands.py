@@ -5,11 +5,22 @@ import time
 from pywizlight import PilotBuilder
 
 from abc import ABC, abstractmethod
-from typing import Iterable, Type
+from typing import Type
 
 from .light import Light
 
 Kelvin = int
+
+
+class Limiter:
+    def __init__(self, commands_per_second):
+        self.wait_time = 1 / commands_per_second
+        self.ready = True
+
+    async def sleep(self):
+        self.ready = False
+        await asyncio.sleep(self.wait_time)
+        self.ready = True
 
 
 class LightCommand(ABC):
@@ -73,36 +84,30 @@ class SetTemperature(LightCommand):
         )
 
 
-class LightCommander:
-    def __init__(self, commands_per_second):
-        """Class to build and run commands. Commands are limited to a certain
-        number of batches per second"""
-        self.last_action_time = 0.0
-        self.wait_time = 1 / commands_per_second
+def command_lights(lights, command: Type[LightCommand], **kwargs):
+    """Build the command for each selected light and run the commands"""
+    if not limiter.ready:
+        return  # too soon to run more commands
 
-    def command_lights(self, lights, command: Type[LightCommand], **kwargs):
-        """Build the command for each selected light and run the commands"""
-        elapsed_time = time.perf_counter() - self.last_action_time
-        if elapsed_time < self.wait_time:
-            return  # too soon to run more commands
+    if not issubclass(command, LightCommand):
+        raise TypeError(f'{command} is not a subclass of {LightCommand}')
 
-        if not issubclass(command, LightCommand):
-            raise TypeError(f'{command} is not a subclass of {LightCommand}')
+    commands = _build_commands(
+        lights=lights, command=command, **kwargs
+    )
+    _run_commands(commands)
+    asyncio.create_task(limiter.sleep())
 
-        commands = self._build_commands(
-            lights=lights, command=command, **kwargs
-        )
-        self._run_commands(commands)
 
-        self.last_action_time = time.perf_counter()
+def _build_commands(lights, command: Type[LightCommand], **kwargs) -> list:
+    """Instantiate the given command class with each light. Returns a list
+    of commands that are concrete LightCommand instances."""
+    return [command(light, **kwargs) for light in lights]
 
-    @staticmethod
-    def _build_commands(lights, command: Type[LightCommand], **kwargs) -> list:
-        """Instantiate the given command class with each light. Returns a list
-        of commands that are concrete LightCommand instances."""
-        return [command(light, **kwargs) for light in lights]
 
-    @staticmethod
-    def _run_commands(commands):
-        for command in commands:
-            asyncio.create_task(command.execute())
+def _run_commands(commands):
+    for command in commands:
+        asyncio.create_task(command.execute())
+
+
+limiter = Limiter(commands_per_second=5)
