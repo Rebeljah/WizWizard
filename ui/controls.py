@@ -18,7 +18,7 @@ class ControlPanel(ttk.Labelframe):
         events.subscribe('set_controlled_lights', self.set_controlled_lights)
 
         self.controlled_lights = set()
-        self.commander = LightCommander(commands_per_second=9)
+        self.commander = LightCommander(commands_per_second=7)
 
         self._build_widgets()
 
