@@ -66,23 +66,23 @@ class OffButton(ttk.Button):
         self.panel.command_lights(TurnOffLight)
 
 
-class BrightnessSlider(ttk.Scale):
+class BrightnessSlider(ttk.LabeledScale):
     def __init__(self, panel: ControlPanel, parent):
         super().__init__(parent)
         self.panel = panel
-        self.config(command=self._on_value_change)
-        self.config(to=255)
+        self.scale.config(command=self._on_value_change)
+        self.scale.config(to=255)
 
     def _on_value_change(self, _):
         self.panel.command_lights(SetBrightness, brightness=self.scale.get())
 
 
-class TemperatureSlider(ttk.Scale):
+class TemperatureSlider(ttk.LabeledScale):
     def __init__(self, panel: ControlPanel, parent):
         super().__init__(parent)
         self.panel = panel
-        self.config(command=self._on_value_change)
-        self.config(from_=1_000, to=10_000)  # Kelvin
+        self.scale.config(command=self._on_value_change)
+        self.scale.config(from_=1_000, to=10_000)  # Kelvin
 
     def _on_value_change(self, _):
         self.panel.command_lights(SetTemperature, temperature=self.scale.get())
