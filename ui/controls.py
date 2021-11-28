@@ -27,7 +27,7 @@ class ControlPanel(ttk.Labelframe):
         BrightnessSlider(self, brightness_frame).pack(fill='x')
         brightness_frame.pack(fill='x', padx=40)
 
-        temperature_frame = ttk.Labelframe(self, text='temeperature (K)')
+        temperature_frame = ttk.Labelframe(self, text='temperature (K)')
         TemperatureSlider(self, temperature_frame).pack(fill='x')
         temperature_frame.pack(fill='x', padx=40)
 
