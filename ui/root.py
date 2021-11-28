@@ -12,7 +12,6 @@ class TkRoot(tk.Tk):
         super().__init__()
         self.title('WizWizard')
         self.protocol("WM_DELETE_WINDOW", self.close)
-        self.loop = None  # set when run() is called
 
         # build
         self.room_tabs = RoomTabs(self)
@@ -23,19 +22,11 @@ class TkRoot(tk.Tk):
         # load home
         self.home_model = Home.from_save('0000000')
 
-    def run(self):
-        async def tkinter_loop():
-            while True:
-                self.update()
-                await asyncio.sleep(1/60)
-
-        self.loop = asyncio.new_event_loop()
-
-        self.loop.create_task(tkinter_loop())
-        self.loop.create_task(self.home_model.update_lights())
-
-        self.loop.run_forever()
+    async def app_mainloop(self):
+        while True:
+            self.update()
+            await asyncio.sleep(1/60)
 
     def close(self):
-        self.loop.stop()
+        asyncio.get_running_loop().stop()
         self.destroy()

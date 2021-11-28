@@ -1,7 +1,6 @@
 """Code for the displaying tabs of rooms, with lights in each room"""
 
 from tkinter import ttk
-from typing import Iterator
 
 import backend
 from . import utils, events
