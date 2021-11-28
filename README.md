@@ -1,2 +1,1 @@
-# WizWizard
-##### A multi-platform app to control your Wiz smart lights
+Control Your Wiz Smart lights from your computer with tkinter!
