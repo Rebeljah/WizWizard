@@ -81,14 +81,14 @@ class Home:
                     ]
                 }
 
-        filepath = os.path.join('save_data', f"{self.id}.json")
+        filepath = os.path.join('data', f"{self.id}.json")
         utils.save_dict_json(data, filepath, indent=4)
 
     @classmethod
     def from_save(cls, home_uid: str):
         """Load then parse home_model data from JSON and return a Home instance"""
 
-        filepath = os.path.join('save_data', f"{home_uid}.json")
+        filepath = os.path.join('data', 'homes', f"{home_uid}.json")
         home_data = utils.load_dict_json(filepath)
 
         # create Home
