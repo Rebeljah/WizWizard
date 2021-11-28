@@ -92,7 +92,7 @@ class Home:
         home_data = utils.load_dict_json(filepath)
 
         # create Home
-        home = Home(home_data['name'], home_data['id'])
+        home = cls(home_data['name'], home_data['id'])
 
         # add Rooms and Lights to Home
         for room_data in home_data['rooms']:
