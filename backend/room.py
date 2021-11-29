@@ -9,7 +9,7 @@ class Room:
     room_types = (
         'attic', 'balcony', 'bar', 'basement', 'bathroom', 'bedroom', 'corridor',
         'dining', 'dressing', 'entrance', 'garage', 'garden', "kid's room",
-        'kitchen', 'living room', 'office', 'playroom', 'terrace', 'tv'
+        'kitchen', 'living room', 'office', 'playroom', 'terrace', 'tv', 'unassigned'
     )
 
     def __init__(self, room_name: str, room_type: str, room_id: Opt[str] = ''):

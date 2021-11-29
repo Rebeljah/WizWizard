@@ -110,4 +110,4 @@ def _run_commands(commands):
         asyncio.create_task(command.execute())
 
 
-limiter = Limiter(commands_per_second=5)
+limiter = Limiter(commands_per_second=9)

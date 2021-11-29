@@ -20,7 +20,7 @@ class Home:
         self.name = home_name
 
         self.rooms = []
-        self.unassigned_lights = []
+        self.unassigned_room = Room('', '', '')
 
     @property
     def id(self) -> str:
@@ -33,9 +33,6 @@ class Home:
         for room in self.rooms:
             for light in room.lights:
                 yield light
-
-        for light in self.unassigned_lights:
-            yield light
 
     def add_room(self, room: Room) -> None:
         self.rooms.append(room)
@@ -50,16 +47,20 @@ class Home:
 
         for room in self.rooms:
             for light in room.lights:
-                bulb = bulbs.get(light.mac, None)
+                bulb = bulbs.pop(light.mac, None)
                 if bulb:
                     await light.set_bulb(bulb)
 
         # create lights from any remaining bulbs and add to the unassigned room
-        self.unassigned_lights = []
-        leftover_bulbs = bulbs.values()
-        for i, bulb in enumerate(leftover_bulbs, 1):
-            light = Light(name=f"Bulb_{i}", mac=bulb.mac, bulb=bulb)
-            self.unassigned_lights.append(light)
+        if self.rooms[-1].type == 'unassigned':
+            del self.rooms[-1]
+
+        self.unassigned_room = Room('New bulbs', room_type='unassigned')
+        self.add_room(self.unassigned_room)
+
+        for bulb in bulbs.values():
+            light = Light(name=bulb.ip, mac=bulb.mac, bulb=bulb)
+            self.unassigned_room.add_light(light)
 
     def save_to_json(self) -> None:
         """Save as JSON the data required to rebuild this Home"""
@@ -77,12 +78,12 @@ class Home:
                                     "mac": light.mac
                                 } for light in room.lights
                             ]
-                        } for room in self.rooms
+                        } for room in self.rooms if room.type != 'unassigned'
                     ]
                 }
 
         filepath = os.path.join('data', f"{self.id}.json")
-        utils.save_dict_json(data, filepath, indent=4)
+        utils.save_dict_json(data, filepath)
 
     @classmethod
     def from_save(cls, home_uid: str):
