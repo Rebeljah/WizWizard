@@ -1,21 +1,19 @@
 """A control panel that controls selected lights in a room"""
 
-from tkinter import colorchooser
 from tkinter import ttk
 from typing import Type
-from abc import ABC, abstractmethod
 
 from backend.light_commands import (
     command_lights, TurnOnLight, TurnOffLight, SetBrightness, SetTemperature
 )
-from . import events
+import ui
 
 
 class ControlPanel(ttk.Labelframe):
     def __init__(self, parent):
         super().__init__(parent)
         self.config(text="Control Panel")
-        events.subscribe('set_controlled_lights', self.set_controlled_lights)
+        ui.events.subscribe('set_controlled_lights', self.set_controlled_lights)
 
         self.controlled_lights = set()
 
