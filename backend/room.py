@@ -1,4 +1,4 @@
-from backend.light import Light
+
 from backend.utils import create_uid
 from backend import events
 
@@ -37,4 +37,11 @@ class Room:
             light.room.lights.remove(light)
         light.room = self
         self.lights.add(light)
+
         events.publish('add_light', light)
+
+
+class UnassignedRoom(Room):
+    """Separate room type for unassigned lights that aren't yet in a room"""
+    def __init__(self):
+        super().__init__('New bulbs', '', room_id='unassigned')
