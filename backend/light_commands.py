@@ -1,26 +1,17 @@
 
 import asyncio
-import time
 
 from pywizlight import PilotBuilder
 
 from abc import ABC, abstractmethod
 from typing import Type
 
-from .light import Light
+from backend.light import Light
+from utils.limiter import Limiter
 
 Kelvin = int
 
-
-class Limiter:
-    def __init__(self, commands_per_second):
-        self.wait_time = 1 / commands_per_second
-        self.ready = True
-
-    async def sleep(self):
-        self.ready = False
-        await asyncio.sleep(self.wait_time)
-        self.ready = True
+LIMITER = Limiter(rate=9)
 
 
 class LightCommand(ABC):
@@ -86,17 +77,17 @@ class SetTemperature(LightCommand):
 
 def command_lights(lights, command: Type[LightCommand], **kwargs):
     """Build the command for each selected light and run the commands"""
-    if not limiter.ready:
+    if LIMITER.waiting:
         return  # too soon to run more commands
 
     if not issubclass(command, LightCommand):
         raise TypeError(f'{command} is not a subclass of {LightCommand}')
 
-    commands = _build_commands(
+    _run_commands(_build_commands(
         lights=lights, command=command, **kwargs
-    )
-    _run_commands(commands)
-    asyncio.create_task(limiter.sleep())
+    ))
+
+    asyncio.create_task(LIMITER.wait())
 
 
 def _build_commands(lights, command: Type[LightCommand], **kwargs) -> list:
@@ -108,6 +99,3 @@ def _build_commands(lights, command: Type[LightCommand], **kwargs) -> list:
 def _run_commands(commands):
     for command in commands:
         asyncio.create_task(command.execute())
-
-
-limiter = Limiter(commands_per_second=5)
