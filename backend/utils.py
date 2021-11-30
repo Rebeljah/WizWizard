@@ -1,6 +1,4 @@
 
-import pywizlight as pwz
-from pywizlight.discovery import find_wizlights
 import json
 import os
 import random
