@@ -1,17 +1,15 @@
 
 import asyncio
-
 from pywizlight import PilotBuilder
-
-from abc import ABC, abstractmethod
-from typing import Type
 
 from backend.light import Light
 from utils.limiter import Limiter
 
+from abc import ABC, abstractmethod
+from typing import Type
 Kelvin = int
 
-LIMITER = Limiter(rate=9)
+LIMITER = Limiter(actions_per_second=9)
 
 
 class LightCommand(ABC):
@@ -21,24 +19,20 @@ class LightCommand(ABC):
 
     @abstractmethod
     async def execute(self):
-        """Do async bulb actions"""
+        """Do async wizlight actions"""
         pass
 
 
-class TurnOnLight(LightCommand):
-    def __init__(self, light: Light):
+class Lightswitch(LightCommand):
+    def __init__(self, light, on=True):
         super().__init__(light)
+        self.on = on
 
     async def execute(self):
-        await self.light.bulb.turn_on()
-
-
-class TurnOffLight(LightCommand):
-    def __init__(self, light: Light):
-        super().__init__(light)
-
-    async def execute(self):
-        await self.light.bulb.turn_off()
+        if self.on:
+            await self.light.turn_on()
+        else:
+            await self.light.turn_off()
 
 
 class SetBrightness(LightCommand):
@@ -53,24 +47,24 @@ class SetBrightness(LightCommand):
         self.brightness = brightness
 
     async def execute(self):
-        await self.light.bulb.turn_on(
+        await self.light.turn_on(
             PilotBuilder(brightness=self.brightness)
         )
 
 
-class SetTemperature(LightCommand):
-    """Set light brightness from 0-255"""
+class SetLightTemp(LightCommand):
+    """Set white light temperature from 0-255"""
     def __init__(self, light, temperature: Kelvin):
         super().__init__(light)
 
         temperature = int(temperature)
-        if not (1000 <= temperature <= 10000):
+        if not (1_000 <= temperature <= 10_000):
             raise ValueError(f'Invalid temperature: {temperature}K')
 
         self.temperature: Kelvin = temperature
 
     async def execute(self):
-        await self.light.bulb.turn_on(
+        await self.light.turn_on(
             PilotBuilder(colortemp=self.temperature)
         )
 
@@ -87,7 +81,7 @@ def command_lights(lights, command: Type[LightCommand], **kwargs):
         lights=lights, command=command, **kwargs
     ))
 
-    asyncio.create_task(LIMITER.wait())
+    LIMITER.wait()
 
 
 def _build_commands(lights, command: Type[LightCommand], **kwargs) -> list:

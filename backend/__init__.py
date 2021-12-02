@@ -4,7 +4,8 @@ from utils.observer import Observer
 events = Observer()
 
 events_names = [
-    'add_room', 'remove_room', 'add_light', 'update_light'
+    'home_add_room', 'home_remove_room', 'add_light', 'remove_light',
+    'light_set_wizlight',
 ]
 for event_name in events_names:
     events.add_event_name(event_name)

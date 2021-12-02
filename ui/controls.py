@@ -4,7 +4,7 @@ from tkinter import ttk
 from typing import Type
 
 from backend.light_commands import (
-    command_lights, TurnOnLight, TurnOffLight, SetBrightness, SetTemperature
+    command_lights, Lightswitch, SetBrightness, SetLightTemp
 )
 import ui
 
@@ -49,7 +49,7 @@ class OnButton(ttk.Button):
         self.config(text='On')
 
     def _on_press(self):
-        self.panel.command_lights(TurnOnLight)
+        self.panel.command_lights(Lightswitch, on=True)
 
 
 class OffButton(ttk.Button):
@@ -60,7 +60,7 @@ class OffButton(ttk.Button):
         self.config(text='Off')
 
     def _on_press(self):
-        self.panel.command_lights(TurnOffLight)
+        self.panel.command_lights(Lightswitch, on=False)
 
 
 class BrightnessSlider(ttk.LabeledScale):
@@ -82,4 +82,4 @@ class TemperatureSlider(ttk.LabeledScale):
         self.scale.config(from_=1_000, to=10_000)  # Kelvin
 
     def _on_value_change(self, _):
-        self.panel.command_lights(SetTemperature, temperature=self.scale.get())
+        self.panel.command_lights(SetLightTemp, temperature=self.scale.get())
