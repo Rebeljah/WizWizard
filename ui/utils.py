@@ -23,12 +23,12 @@ def get_image(query_fn) -> PhotoImage:
     def load_image():
         file_path = os.path.join(img_dir, get_full_filename())
         # try to load from cache dict or load from disk
-        img = _image_cache.get(file_path)
 
-        if not img:
+        if img := _image_cache.get(file_path):
+            return img
+        else:
             img = ImageTk.PhotoImage(Image.open(file_path))
             _image_cache.update({file_path: img})
-
-        return img
+            return img
 
     return load_image()
