@@ -1,4 +1,4 @@
-"""Observer  that allows the backend to subscribe to UI events and vica-versa"""
+"""Observer  that allows the backend to subscribe to UI events and visa-versa"""
 
 
 from typing import Callable

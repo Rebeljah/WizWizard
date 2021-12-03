@@ -3,7 +3,9 @@
 from tkinter import ttk
 
 import backend
-from . import utils, events
+from backend.room import Room
+import ui
+from ui import utils
 
 
 class RoomTabs(ttk.Notebook):
@@ -11,7 +13,8 @@ class RoomTabs(ttk.Notebook):
     def __init__(self, parent):
         super().__init__(parent)
         self.bind('<<NotebookTabChanged>>', self._on_change_tab)
-        backend.events.subscribe('add_room', self.add_room_tab)
+        backend.events.subscribe('home_add_room', self.add_room_tab)
+        backend.events.subscribe('home_remove_room', self.remove_room_tab)
 
         self.selected_lights = set()
 
@@ -21,15 +24,23 @@ class RoomTabs(ttk.Notebook):
 
     def set_selected_lights(self, lights):
         self.selected_lights = lights
-        events.publish('set_controlled_lights', lights)
+        ui.events.publish('set_controlled_lights', lights)
 
     def add_room_tab(self, room):
-        # check if it is the first tab and set lights
-        if len(self.winfo_children()) == 0:
-            self.set_selected_lights(room.lights)
-
         new_tab = RoomTab(self, room)
         self.add(new_tab, text=room.name)
+
+        # check if it is the first tab and set lights
+        if not len(self.winfo_children()):
+            self.set_selected_lights(new_tab.selected_lights)
+
+    def remove_room_tab(self, room: Room):
+        # remove tab
+        self.forget(room.name)
+
+        # deselect lights if room lights are selected
+        if self.selected_lights.intersection(room.lights):
+            self.selected_lights = set()
 
 
 class RoomTab(ttk.Frame):
@@ -44,8 +55,7 @@ class RoomTab(ttk.Frame):
 
     def add_light_button(self, light):
         if light in self.room.lights:
-            new_button = LightButton(self, light, text=light.name)
-            new_button.pack(side='left', anchor='nw', padx=10, pady=10)
+            LightButton(self, light).pack(side='left', anchor='n')
 
     def select_light(self, light):
         self.selected_lights.add(light)
@@ -54,13 +64,23 @@ class RoomTab(ttk.Frame):
         self.selected_lights.remove(light)
 
 
-class LightButton(ttk.Button):
-    """Button used to select a light."""
-    def __init__(self, parent, light, **kwargs):
-        super().__init__(parent, **kwargs)
-        backend.events.subscribe('update_light', self._update_light)
+class LightButton(ttk.Frame):
+    """Frame to hold a light select button and well as display the light name"""
+    def __init__(self, room_tab, light):
+        super().__init__(room_tab)
+        self.tab = room_tab
 
-        self.tab = parent
+        LightSelectButton(self, self.tab, light).pack(side='top')
+        ttk.Label(self, text=light.name).pack(side='top')
+
+
+class LightSelectButton(ttk.Button):
+    """Button used to select a light."""
+    def __init__(self, parent, room_tab, light, **kwargs):
+        super().__init__(parent, **kwargs)
+        backend.events.subscribe('light_set_wizlight', self._update_light)
+
+        self.tab = room_tab
         self.light = light
 
         # Toggle behavior
@@ -85,8 +105,8 @@ class LightButton(ttk.Button):
         if light is not self.light:
             return
 
-        # check if bulb is present / on
-        if not light.bulb:
+        # check if wizlight is present / on
+        if not light.wizlight:
             self.image_state = 'alert'
         elif light.is_on:
             self.image_state = 'on'

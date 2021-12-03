@@ -1,4 +1,4 @@
-from observer.observer import Observer
+from utils.observer import Observer
 
 # create frontend observer and register event types
 events = Observer()
