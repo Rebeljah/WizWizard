@@ -1,13 +1,14 @@
 import os
 from pywizlight.discovery import discover_lights
 
-from . import utils, events
-from .room import Room
-from .light import Light
+import backend
+from backend import utils
+from backend.room import Room, UnassignedRoom
+from backend.light import Light
 
 
 from typing import Iterator, Optional
-MAC = str
+RoomId = MAC = str
 
 
 class Home:
@@ -16,16 +17,21 @@ class Home:
     contains lights.
     """
     def __init__(self, home_name: str, home_id: Optional[str] = ''):
-        self._id = home_id if home_id else utils.create_uid(7)
+        self._id = home_id or utils.create_uid()
         self.name = home_name
-
-        self.rooms = []
-        self.unassigned_lights = []
+        self.rooms: set = set()
 
     @property
     def id(self) -> str:
         """Read-only alias of self._id"""
         return self._id
+
+    @property
+    def saved_rooms(self) -> Iterator[Room]:
+        """Yield rooms that should be saved to the data folder"""
+        for room in self.rooms:
+            if not isinstance(room, UnassignedRoom):
+                yield room
 
     @property
     def lights(self) -> Iterator[Light]:
@@ -34,55 +40,63 @@ class Home:
             for light in room.lights:
                 yield light
 
-        for light in self.unassigned_lights:
-            yield light
-
     def add_room(self, room: Room) -> None:
-        self.rooms.append(room)
+        """Add the room to the home"""
+        self.rooms.add(room)
         room.home = self
-        events.publish('add_room', room)
+        backend.events.publish('home_add_room', room)
 
-    async def update_lights(self):
-        """Find bulbs and attach them to lights"""
-        # get bulb_connected bulbs from LAN
-        bulbs = await discover_lights('192.168.1.255')
-        bulbs = {bulb.mac: bulb for bulb in bulbs}
+    def remove_room(self, room: Room):
+        """Remove the room given room"""
+        self.rooms.remove(room)
+        backend.events.publish('home_remove_room', room)
 
-        for room in self.rooms:
-            for light in room.lights:
-                bulb = bulbs.get(light.mac, None)
-                if bulb:
-                    await light.set_bulb(bulb)
+    async def find_lights(self):
+        """Find wizlights and attach them to lights. Add any unassigned lights"""
+        found_lights = {}
+        for wizlight in await discover_lights('192.168.1.255'):
+            found_lights[wizlight.mac] = wizlight
 
-        # create lights from any remaining bulbs and add to the unassigned room
-        self.unassigned_lights = []
-        leftover_bulbs = bulbs.values()
-        for i, bulb in enumerate(leftover_bulbs, 1):
-            light = Light(name=f"Bulb_{i}", mac=bulb.mac, bulb=bulb)
-            self.unassigned_lights.append(light)
+        # pop and attach wizlights to lights with matching MACs
+        for light in self.lights:
+            if b := found_lights.pop(light.mac, False):
+                await light.set_wizlight(b)
 
-    def save_to_json(self) -> None:
+        # return if no wizlights are remaining
+        if not (remaining := found_lights.values()):
+            return
+
+        # Re-instantiate the unassigned lights room
+        room = UnassignedRoom()
+        self.add_room(room)
+
+        # add any remaining wizlights to unassigned room
+        for wizlight in remaining:
+            room.add_light(
+                Light(name=wizlight.ip, mac=wizlight.mac, wizlight=wizlight)
+            )
+
+    def save(self) -> None:
         """Save as JSON the data required to rebuild this Home"""
         data = {
-                    "name": self.name,
-                    "id": self.id,
-                    "rooms": [
+            "name": self.name,
+            "id": self.id,
+            "rooms": [
+                {
+                    "name": room.name,
+                    "type": room.type,
+                    "id": room.id,
+                    "lights": [
                         {
-                            "name": room.name,
-                            "type": room.type,
-                            "id": room.id,
-                            "lights": [
-                                {
-                                    "name": light.name,
-                                    "mac": light.mac
-                                } for light in room.lights
-                            ]
-                        } for room in self.rooms
+                            "name": light.name,
+                            "mac": light.mac
+                        } for light in room.lights
                     ]
-                }
+                } for room in self.saved_rooms
+            ]
+        }
 
-        filepath = os.path.join('data', f"{self.id}.json")
-        utils.save_dict_json(data, filepath, indent=4)
+        utils.save_dict_json(data, os.path.join('data', f"{self.id}.json"))
 
     @classmethod
     def from_save(cls, home_uid: str):

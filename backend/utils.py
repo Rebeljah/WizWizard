@@ -1,6 +1,4 @@
 
-import pywizlight as pwz
-from pywizlight.discovery import find_wizlights
 import json
 import os
 import random
@@ -25,6 +23,7 @@ def load_dict_json(filepath: str) -> dict:
         return json.load(infile)
 
 
-def create_uid(length: int = 7) -> str:
-    """Return a unique identifier containing digits 0-9"""
-    return ''.join(random.sample(string.digits, length))
+def create_uid(length: int = 10) -> str:
+    """Return a unique alphanumeric identifier string"""
+    chars = string.digits + string.ascii_lowercase
+    return ''.join(random.sample(chars, length))

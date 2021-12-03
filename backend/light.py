@@ -2,7 +2,8 @@
 Module to contain code for lights and light groups for controlling lights in rooms
 """
 import asyncio
-from pywizlight import wizlight as Wizlight
+from pywizlight.bulb import wizlight as Wizlight
+from pywizlight.bulb import PilotBuilder
 
 from . import events
 
@@ -13,7 +14,7 @@ from typing import Optional
 class Light:
     # TODO add light type names as a class var like the room class
     """Class to represent a light object that controls a real bulb"""
-    def __init__(self, name: str, mac: str, bulb: Optional[Wizlight] = None):
+    def __init__(self, name: str, mac: str, wizlight: Optional[Wizlight] = None):
         # parent
         self.room = None
 
@@ -22,10 +23,10 @@ class Light:
         self.name = name
 
         # set bulb now if it was passed
-        if bulb is None:
-            self.bulb = None
+        if wizlight:
+            asyncio.create_task(self.set_wizlight(wizlight))
         else:
-            asyncio.create_task(self.set_bulb(bulb))
+            self.wizlight = None
 
     @property
     def mac(self) -> str:
@@ -34,20 +35,26 @@ class Light:
     @property
     def brightness(self) -> int:
         """return current brightness 0-255"""
-        if self.bulb:
-            return self.bulb.state.get_brightness()
+        if self.wizlight:
+            return self.wizlight.state.get_brightness()
 
     @property
     def is_on(self) -> bool:
         """Check if the light is turned on"""
-        if self.bulb:
-            return self.bulb.status
-        else:
-            return False
+        return self.wizlight and self.wizlight.status
 
-    async def set_bulb(self, bulb: Wizlight):
+    async def set_wizlight(self, wizlight: Wizlight):
         """Attach a matching bulb to this light. """
-        assert bulb.mac == self._mac
-        await bulb.updateState()
-        self.bulb = bulb
-        events.publish('update_light', self)
+        assert wizlight.mac == self._mac
+        await wizlight.updateState()
+        self.wizlight = wizlight
+        events.publish('light_set_wizlight', self)
+
+    async def turn_on(self, pilot_builder: PilotBuilder = None):
+        if pilot_builder:
+            await self.wizlight.turn_on(pilot_builder)
+        else:
+            await self.wizlight.turn_on()
+
+    async def turn_off(self):
+        await self.wizlight.turn_off()
