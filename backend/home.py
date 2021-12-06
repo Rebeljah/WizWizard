@@ -2,6 +2,7 @@ import os
 from pywizlight.discovery import discover_lights
 
 import backend
+import ui
 from backend import utils
 from backend.room import Room, UnassignedRoom
 from backend.light import Light
@@ -20,6 +21,9 @@ class Home:
         self._id = home_id or utils.create_uid()
         self.name = home_name
         self.rooms: set = set()
+
+        backend.active_home = self
+        ui.events.subscribe('add_room', self.add_room, self.on_edit_home)
 
     @property
     def id(self) -> str:
@@ -76,7 +80,10 @@ class Home:
                 Light(name=wizlight.ip, mac=wizlight.mac, wizlight=wizlight)
             )
 
-    def save(self) -> None:
+    def on_edit_home(self, *args):
+        self.save_to_json()
+
+    def save_to_json(self) -> None:
         """Save as JSON the data required to rebuild this Home"""
         data = {
             "name": self.name,
@@ -96,7 +103,8 @@ class Home:
             ]
         }
 
-        utils.save_dict_json(data, os.path.join('data', f"{self.id}.json"))
+        filepath = os.path.join('data', 'homes', f"{self.id}.json")
+        utils.save_dict_json(data, filepath)
 
     @classmethod
     def from_save(cls, home_uid: str):

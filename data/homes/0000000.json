@@ -19,16 +19,16 @@
             "id": "8760243",
             "lights": [
                 {
+                    "name": "Corner",
+                    "mac": "a8bb50cf0f3b"
+                },
+                {
                     "name": "Dual1",
                     "mac": "a8bb50cf05f6"
                 },
                 {
                     "name": "Dual2",
                     "mac": "a8bb50c5c646"
-                },
-                {
-                    "name": "Corner",
-                    "mac": "a8bb50cf0f3b"
                 }
             ]
         },
@@ -46,16 +46,16 @@
                     "mac": "6c299023637d"
                 },
                 {
+                    "name": "KL5",
+                    "mac": "6c299024f1f7"
+                },
+                {
                     "name": "KL3",
                     "mac": "6c2990235635"
                 },
                 {
                     "name": "KL4",
                     "mac": "6c299024b523"
-                },
-                {
-                    "name": "KL5",
-                    "mac": "6c299024f1f7"
                 }
             ]
         },

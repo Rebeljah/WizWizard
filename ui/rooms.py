@@ -27,12 +27,16 @@ class RoomTabs(ttk.Notebook):
         ui.events.publish('set_controlled_lights', lights)
 
     def add_room_tab(self, room):
+        num_tabs = len(self.winfo_children())
         new_tab = RoomTab(self, room)
-        self.add(new_tab, text=room.name)
 
         # check if it is the first tab and set lights
-        if not len(self.winfo_children()):
-            self.set_selected_lights(new_tab.selected_lights)
+        if num_tabs < 1:
+            self.set_selected_lights(room.lights)
+            self.add(new_tab, text=room.name)
+        else:  # place it before last tab
+            end_index = num_tabs - 1
+            self.insert(end_index, new_tab, text=room.name)
 
     def remove_room_tab(self, room: Room):
         # remove tab
@@ -55,7 +59,8 @@ class RoomTab(ttk.Frame):
 
     def add_light_button(self, light):
         if light in self.room.lights:
-            LightButton(self, light).pack(side='left', anchor='n')
+            new_button = LightButton(self, light, text=light.name)
+            new_button.pack(side='left', anchor='nw', padx=10, pady=10)
 
     def select_light(self, light):
         self.selected_lights.add(light)

@@ -11,10 +11,11 @@ class Observer:
     def __init__(self):
         self.subscriber_dict: SubscriberDict = {}
 
-    def subscribe(self, event_name, callback):
+    def subscribe(self, event_name, *callbacks):
         """Add the subscribing callback to the set of subscribers"""
         subscribers: set = self.subscriber_dict[event_name]
-        subscribers.add(callback)
+        for cb in callbacks:
+            subscribers.add(cb)
 
     def unsubscribe(self, event_name, callback):
         """remove the callback from the subscribers"""
