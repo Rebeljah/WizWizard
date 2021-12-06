@@ -24,12 +24,16 @@ class RoomTabs(ttk.Notebook):
         events.publish('set_controlled_lights', lights)
 
     def add_room_tab(self, room):
-        # check if it is the first tab and set lights
-        if len(self.winfo_children()) == 0:
-            self.set_selected_lights(room.lights)
-
+        num_tabs = len(self.winfo_children())
         new_tab = RoomTab(self, room)
-        self.add(new_tab, text=room.name)
+
+        # check if it is the first tab and set lights
+        if num_tabs < 1:
+            self.set_selected_lights(room.lights)
+            self.add(new_tab, text=room.name)
+        else:  # place it before last tab
+            end_index = num_tabs - 1
+            self.insert(end_index, new_tab, text=room.name)
 
 
 class RoomTab(ttk.Frame):
