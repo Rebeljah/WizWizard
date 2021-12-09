@@ -1,10 +1,11 @@
+
 import tkinter as tk
-from tkinter import ttk
 import asyncio
 
-from .rooms import RoomTabs
-from .controls import ControlPanel
 from backend.home import Home
+from ui.rooms import RoomTabs
+from ui.controls import ControlPanel
+from ui.menu import MenuOpener
 
 
 class TkRoot(tk.Tk):
@@ -14,10 +15,9 @@ class TkRoot(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.close)
 
         # build
-        self.room_tabs = RoomTabs(self)
-        self.room_tabs.pack(fill='both', expand=True)
-        self.control_panel = ControlPanel(self)
-        self.control_panel.pack(fill='both', side='bottom')
+        MenuOpener(self).pack(side='top', anchor='ne')
+        RoomTabs(self).pack(fill='both', expand=True)
+        ControlPanel(self).pack(fill='both', side='bottom')
 
         # load home
         self.home_model = Home.from_save('0000000')

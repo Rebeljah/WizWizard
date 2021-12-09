@@ -1,9 +1,10 @@
-"""Observer  that allows the backend to subscribe to UI events and vica-versa"""
+"""Observer  that allows the backend to subscribe to UI events and visa-versa"""
 
 
 from typing import Callable
 EventName = str
-SubscriberDict = dict[EventName, set[Callable]]
+CallBackTuple = tuple[Callable]
+SubscriberDict = dict[EventName, set[CallBackTuple]]
 
 
 class Observer:
@@ -11,10 +12,10 @@ class Observer:
     def __init__(self):
         self.subscriber_dict: SubscriberDict = {}
 
-    def subscribe(self, event_name, callback):
+    def subscribe(self, event_name, *callbacks):
         """Add the subscribing callback to the set of subscribers"""
-        subscribers: set = self.subscriber_dict[event_name]
-        subscribers.add(callback)
+        subscribers: set[tuple] = self.subscriber_dict[event_name]
+        subscribers.add(callbacks)
 
     def unsubscribe(self, event_name, callback):
         """remove the callback from the subscribers"""
@@ -22,12 +23,13 @@ class Observer:
         subscribers.remove(callback)
 
     def publish(self, event_name, *args):
-        """Publish arguments to any callbacks subscribing to the event_name"""
+        """Publish arguments to any callback routines subscribing to the event_name"""
         subscribers: set = self.subscriber_dict[event_name]
-        for callback in subscribers:
-            callback(*args)
+        for callback_routine in subscribers:
+            for callback in callback_routine:
+                callback(*args)
 
-    def add_event_name(self, event_name):
+    def register_event_name(self, event_name):
         """Add event name to events dict"""
         assert event_name not in self.subscriber_dict
         self.subscriber_dict.update({event_name: set()})

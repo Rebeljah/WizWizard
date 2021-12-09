@@ -1,21 +1,19 @@
 """A control panel that controls selected lights in a room"""
 
-from tkinter import colorchooser
 from tkinter import ttk
 from typing import Type
-from abc import ABC, abstractmethod
 
 from backend.light_commands import (
-    command_lights, TurnOnLight, TurnOffLight, SetBrightness, SetTemperature
+    command_lights, Lightswitch, SetBrightness, SetLightTemp
 )
-from . import events
+import ui
 
 
 class ControlPanel(ttk.Labelframe):
     def __init__(self, parent):
         super().__init__(parent)
         self.config(text="Control Panel")
-        events.subscribe('set_controlled_lights', self.set_controlled_lights)
+        ui.events.subscribe('set_controlled_lights', self.set_controlled_lights)
 
         self.controlled_lights = set()
 
@@ -51,7 +49,7 @@ class OnButton(ttk.Button):
         self.config(text='On')
 
     def _on_press(self):
-        self.panel.command_lights(TurnOnLight)
+        self.panel.command_lights(Lightswitch, on=True)
 
 
 class OffButton(ttk.Button):
@@ -62,7 +60,7 @@ class OffButton(ttk.Button):
         self.config(text='Off')
 
     def _on_press(self):
-        self.panel.command_lights(TurnOffLight)
+        self.panel.command_lights(Lightswitch, on=False)
 
 
 class BrightnessSlider(ttk.LabeledScale):
@@ -84,4 +82,4 @@ class TemperatureSlider(ttk.LabeledScale):
         self.scale.config(from_=1_000, to=10_000)  # Kelvin
 
     def _on_value_change(self, _):
-        self.panel.command_lights(SetTemperature, temperature=self.scale.get())
+        self.panel.command_lights(SetLightTemp, temperature=self.scale.get())
