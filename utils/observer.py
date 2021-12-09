@@ -17,11 +17,6 @@ class Observer:
         subscribers: set[tuple] = self.subscriber_dict[event_name]
         subscribers.add(callbacks)
 
-    def unsubscribe(self, event_name, callback):
-        """remove the callback from the subscribers"""
-        subscribers: set = self.subscriber_dict[event_name]
-        subscribers.remove(callback)
-
     def publish(self, event_name, *args):
         """Publish arguments to any callback routines subscribing to the event_name"""
         subscribers: set = self.subscriber_dict[event_name]
