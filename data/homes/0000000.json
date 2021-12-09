@@ -3,6 +3,52 @@
     "id": "0000000",
     "rooms": [
         {
+            "name": "Living",
+            "type": "living room",
+            "id": "8760243",
+            "lights": [
+                {
+                    "name": "Dual2",
+                    "mac": "a8bb50c5c646"
+                },
+                {
+                    "name": "Dual1",
+                    "mac": "a8bb50cf05f6"
+                },
+                {
+                    "name": "Corner",
+                    "mac": "a8bb50cf0f3b"
+                }
+            ]
+        },
+        {
+            "name": "Kitchen",
+            "type": "kitchen",
+            "id": "2491685",
+            "lights": [
+                {
+                    "name": "KL2",
+                    "mac": "6c299023637d"
+                },
+                {
+                    "name": "KL5",
+                    "mac": "6c299024f1f7"
+                },
+                {
+                    "name": "KL4",
+                    "mac": "6c299024b523"
+                },
+                {
+                    "name": "KL1",
+                    "mac": "6c299023e8d5"
+                },
+                {
+                    "name": "KL3",
+                    "mac": "6c2990235635"
+                }
+            ]
+        },
+        {
             "name": "Front Bed",
             "type": "bedroom",
             "id": "9431062",
@@ -14,63 +60,17 @@
             ]
         },
         {
-            "name": "Living",
-            "type": "living room",
-            "id": "8760243",
-            "lights": [
-                {
-                    "name": "Corner",
-                    "mac": "a8bb50cf0f3b"
-                },
-                {
-                    "name": "Dual1",
-                    "mac": "a8bb50cf05f6"
-                },
-                {
-                    "name": "Dual2",
-                    "mac": "a8bb50c5c646"
-                }
-            ]
-        },
-        {
-            "name": "Kitchen",
-            "type": "kitchen",
-            "id": "2491685",
-            "lights": [
-                {
-                    "name": "KL1",
-                    "mac": "6c299023e8d5"
-                },
-                {
-                    "name": "KL2",
-                    "mac": "6c299023637d"
-                },
-                {
-                    "name": "KL5",
-                    "mac": "6c299024f1f7"
-                },
-                {
-                    "name": "KL3",
-                    "mac": "6c2990235635"
-                },
-                {
-                    "name": "KL4",
-                    "mac": "6c299024b523"
-                }
-            ]
-        },
-        {
             "name": "Back bed",
             "type": "bedroom",
             "id": "0178392",
             "lights": [
                 {
-                    "name": "Dual1",
-                    "mac": "a8bb50d0178a"
-                },
-                {
                     "name": "Dual2",
                     "mac": "a8bb50c415a9"
+                },
+                {
+                    "name": "Dual1",
+                    "mac": "a8bb50d0178a"
                 }
             ]
         }

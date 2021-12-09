@@ -4,31 +4,29 @@ import os
 
 
 # full_filename maps to PhotoImage
-_image_cache: dict[str, PhotoImage] = {}
+IMG_CACHE: dict[str, PhotoImage] = {}
+IMG_DIR = os.path.join('.', 'data', 'img')
 
 
-def get_image(query_fn) -> PhotoImage:
+def get_image(partial_filename) -> PhotoImage:
     """You do not need to supply a file extension, only the filename.
     Tries to get the image from the cached images before loading from disk"""
-    img_dir = os.path.join('.', 'data', 'img')
 
-    def get_full_filename():
+    def get_full_filepath():
         # use the query_fn to match to a full filename in the img folder
-        for fn in os.listdir(img_dir):
-            if query_fn in fn:
-                return fn
+        for full_filename in os.listdir(IMG_DIR):
+            if partial_filename in full_filename:
+                return os.path.join(IMG_DIR, full_filename)
         else:
-            raise FileNotFoundError(f'Could find image matching "{query_fn}"')
+            raise FileNotFoundError(f'Could find image matching "{partial_filename}"')
 
-    def load_image():
-        file_path = os.path.join(img_dir, get_full_filename())
+    def load_image(file_path):
         # try to load from cache dict or load from disk
-
-        if img := _image_cache.get(file_path):
+        if img := IMG_CACHE.get(file_path):
             return img
         else:
             img = ImageTk.PhotoImage(Image.open(file_path))
-            _image_cache.update({file_path: img})
+            IMG_CACHE[file_path] = img
             return img
 
-    return load_image()
+    return load_image(get_full_filepath())

@@ -23,7 +23,7 @@ class Home:
         self.rooms: set = set()
 
         backend.active_home = self
-        ui.events.subscribe('add_room', self.add_room, self.on_edit_home)
+        ui.events.subscribe('add_room', self.add_room, self.update)
 
     @property
     def id(self) -> str:
@@ -80,7 +80,7 @@ class Home:
                 Light(name=wizlight.ip, mac=wizlight.mac, wizlight=wizlight)
             )
 
-    def on_edit_home(self, *args):
+    def update(self, *args):
         self.save_to_json()
 
     def save_to_json(self) -> None:

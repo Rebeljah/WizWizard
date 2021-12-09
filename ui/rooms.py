@@ -59,7 +59,7 @@ class RoomTab(ttk.Frame):
 
     def add_light_button(self, light):
         if light in self.room.lights:
-            new_button = LightButton(self, light, text=light.name)
+            new_button = LightButton(self, light)
             new_button.pack(side='left', anchor='nw', padx=10, pady=10)
 
     def select_light(self, light):
