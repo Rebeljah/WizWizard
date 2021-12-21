@@ -1,4 +1,5 @@
 import os
+from functools import partial
 from pywizlight.discovery import discover_lights
 
 import backend
@@ -20,10 +21,10 @@ class Home:
     def __init__(self, home_name: str, home_id: Optional[str] = ''):
         self._id = home_id or utils.create_uid()
         self.name = home_name
-        self.rooms: set = set()
+        self.rooms = []
 
         backend.active_home = self
-        ui.events.subscribe('add_room', self.add_room, self.update)
+        ui.events.subscribe('add_room', partial(self.add_room, save=True))
 
     @property
     def id(self) -> str:
@@ -44,16 +45,22 @@ class Home:
             for light in room.lights:
                 yield light
 
-    def add_room(self, room: Room) -> None:
+    def add_room(self, room: Room, save=False) -> None:
         """Add the room to the home"""
-        self.rooms.add(room)
+        self.rooms.append(room)
         room.home = self
-        backend.events.publish('home_add_room', room)
 
-    def remove_room(self, room: Room):
+        backend.events.publish('home_add_room', room)
+        if save:
+            self.save_to_json()
+
+    def remove_room(self, room: Room, save=False) -> None:
         """Remove the room given room"""
         self.rooms.remove(room)
+
         backend.events.publish('home_remove_room', room)
+        if save:
+            self.save_to_json()
 
     async def find_lights(self):
         """Find wizlights and attach them to lights. Add any unassigned lights"""
@@ -66,22 +73,19 @@ class Home:
             if b := found_lights.pop(light.mac, False):
                 await light.set_wizlight(b)
 
-        # return if no wizlights are remaining
+        # Check if there are any unassigned wizlights left
         if not (remaining := found_lights.values()):
             return
 
-        # Re-instantiate the unassigned lights room
-        room = UnassignedRoom()
-        self.add_room(room)
+        # Re-instantiate the home's new lights room
+        new_lights_room = UnassignedRoom()
+        self.add_room(new_lights_room)
 
         # add any remaining wizlights to unassigned room
         for wizlight in remaining:
-            room.add_light(
-                Light(name=wizlight.ip, mac=wizlight.mac, wizlight=wizlight)
+            new_lights_room.add_light(
+                Light(name=wizlight.mac, mac=wizlight.mac, wizlight=wizlight)
             )
-
-    def update(self, *args):
-        self.save_to_json()
 
     def save_to_json(self) -> None:
         """Save as JSON the data required to rebuild this Home"""

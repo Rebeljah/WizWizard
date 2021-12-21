@@ -8,16 +8,16 @@
             "id": "8760243",
             "lights": [
                 {
-                    "name": "Dual2",
-                    "mac": "a8bb50c5c646"
-                },
-                {
                     "name": "Dual1",
                     "mac": "a8bb50cf05f6"
                 },
                 {
                     "name": "Corner",
                     "mac": "a8bb50cf0f3b"
+                },
+                {
+                    "name": "Dual2",
+                    "mac": "a8bb50c5c646"
                 }
             ]
         },
@@ -26,6 +26,10 @@
             "type": "kitchen",
             "id": "2491685",
             "lights": [
+                {
+                    "name": "KL3",
+                    "mac": "6c2990235635"
+                },
                 {
                     "name": "KL2",
                     "mac": "6c299023637d"
@@ -41,10 +45,6 @@
                 {
                     "name": "KL1",
                     "mac": "6c299023e8d5"
-                },
-                {
-                    "name": "KL3",
-                    "mac": "6c2990235635"
                 }
             ]
         },
@@ -65,14 +65,26 @@
             "id": "0178392",
             "lights": [
                 {
-                    "name": "Dual2",
-                    "mac": "a8bb50c415a9"
-                },
-                {
                     "name": "Dual1",
                     "mac": "a8bb50d0178a"
+                },
+                {
+                    "name": "Dual2",
+                    "mac": "a8bb50c415a9"
                 }
             ]
+        },
+        {
+            "name": "test",
+            "type": "attic",
+            "id": "fsotz729d4",
+            "lights": []
+        },
+        {
+            "name": "test2",
+            "type": "attic",
+            "id": "5sl13gbxwr",
+            "lights": []
         }
     ]
 }

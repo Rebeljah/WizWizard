@@ -53,4 +53,4 @@ class Room:
 class UnassignedRoom(Room):
     """Separate room type for unassigned lights that aren't yet in a room"""
     def __init__(self):
-        super().__init__('New lights', '', room_id='unassigned')
+        super().__init__('| New lights |', '', room_id='unassigned')

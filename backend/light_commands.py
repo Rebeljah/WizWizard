@@ -6,7 +6,7 @@ from backend.light import Light
 from utils.limiter import Limiter
 
 from abc import ABC, abstractmethod
-from typing import Type
+from typing import Type, Iterable
 Kelvin = int
 
 LIMITER = Limiter(actions_per_second=9)
@@ -69,13 +69,10 @@ class SetLightTemp(LightCommand):
         )
 
 
-def command_lights(lights, command: Type[LightCommand], **kwargs):
+def command_lights(lights, command: Type[LightCommand], **kwargs) -> None:
     """Build the command for each selected light and run the commands"""
     if LIMITER.waiting:
         return  # too soon to run more commands
-
-    if not issubclass(command, LightCommand):
-        raise TypeError(f'{command} is not a subclass of {LightCommand}')
 
     _run_commands(_build_commands(
         lights=lights, command=command, **kwargs
@@ -90,6 +87,6 @@ def _build_commands(lights, command: Type[LightCommand], **kwargs) -> list:
     return [command(light, **kwargs) for light in lights]
 
 
-def _run_commands(commands):
+def _run_commands(commands: Iterable[LightCommand]) -> None:
     for command in commands:
         asyncio.create_task(command.execute())

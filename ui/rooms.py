@@ -3,7 +3,7 @@
 from tkinter import ttk
 
 import backend
-from backend.room import Room
+from backend.room import Room, UnassignedRoom
 import ui
 from ui import utils
 
@@ -17,6 +17,7 @@ class RoomTabs(ttk.Notebook):
         backend.events.subscribe('home_remove_room', self.remove_room_tab)
 
         self.selected_lights = set()
+        self.new_lights_tab = None
 
     def _on_change_tab(self, event):
         curr_tab = self.nametowidget(self.select())
@@ -24,19 +25,18 @@ class RoomTabs(ttk.Notebook):
 
     def set_selected_lights(self, lights):
         self.selected_lights = lights
-        ui.events.publish('set_controlled_lights', lights)
+        ui.events.publish('set_selected_lights', lights)
 
     def add_room_tab(self, room):
-        num_tabs = len(self.winfo_children())
-        new_tab = RoomTab(self, room)
-
-        # check if it is the first tab and set lights
-        if num_tabs < 1:
-            self.set_selected_lights(room.lights)
-            self.add(new_tab, text=room.name)
-        else:  # place it before last tab
-            end_index = num_tabs - 1
-            self.insert(end_index, new_tab, text=room.name)
+        tab = RoomTab(self, room)
+        text = room.name
+        if isinstance(room, UnassignedRoom):
+            self.add(tab, text=text)
+            self.new_lights_tab = tab
+        elif self.new_lights_tab in self.winfo_children():
+            self.insert(1, tab, text=text)
+        else:
+            self.add(tab, text=text)
 
     def remove_room_tab(self, room: Room):
         # remove tab
