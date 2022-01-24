@@ -24,7 +24,7 @@ class Home:
         self.rooms = []
 
         backend.active_home = self
-        ui.events.subscribe('add_room', partial(self.add_room, save=True))
+        ui.events.subscribe(ui.AddRoom, partial(self.add_room, save=True))
 
     @property
     def id(self) -> str:
@@ -50,7 +50,7 @@ class Home:
         self.rooms.append(room)
         room.home = self
 
-        backend.events.publish('home_add_room', room)
+        backend.events.publish(backend.HomeAddRoom(room=room))
         if save:
             self.save_to_json()
 
@@ -58,7 +58,7 @@ class Home:
         """Remove the room given room"""
         self.rooms.remove(room)
 
-        backend.events.publish('home_remove_room', room)
+        backend.events.publish(backend.HomeRemoveRoom(room=room))
         if save:
             self.save_to_json()
 

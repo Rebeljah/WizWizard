@@ -5,6 +5,7 @@ import asyncio
 from pywizlight.bulb import wizlight as Wizlight
 from pywizlight.bulb import PilotBuilder
 
+import backend
 from . import events
 
 
@@ -48,7 +49,7 @@ class Light:
         assert wizlight.mac == self._mac
         await wizlight.updateState()
         self.wizlight = wizlight
-        events.publish('light_set_wizlight', self)
+        events.publish(backend.LightSetWizlight(light=self))
 
     async def turn_on(self, pilot_builder: PilotBuilder = None):
         if pilot_builder:
