@@ -94,7 +94,7 @@ class CreateRoomTab(ttk.Frame):
         name, type_ = self.room_name.get(), self.room_type.get()
         if name.isalnum():
             new_room: Room = Room(name, type_)
-            ui.events.publish('add_room', new_room)
+            ui.events.publish(ui.AddRoom(room=new_room))
 
 
 class LightsMenuWindow(MenuWindow):

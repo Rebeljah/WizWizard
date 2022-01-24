@@ -37,13 +37,13 @@ class Room:
         light.room = self
         self.lights.add(light)
 
-        backend.events.publish('add_light', light)
+        backend.events.publish(backend.AddLight(light=light))
 
     def remove_light(self, light):
         light.room = None
         self.lights.remove(light)
 
-        backend.events.publish('remove_light', light)
+        backend.events.publish(backend.RemoveLight(light=light))
 
     def clear_lights(self):
         for light in self.lights:

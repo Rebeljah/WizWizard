@@ -13,7 +13,7 @@ class ControlPanel(ttk.Labelframe):
     def __init__(self, parent):
         super().__init__(parent)
         self.config(text="Control Panel")
-        ui.events.subscribe('set_selected_lights', self.set_controlled_lights)
+        ui.events.subscribe(ui.SetSelectedLights, self.set_controlled_lights)
 
         self.controlled_lights = set()
 
