@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from typing import Optional, Type
+from typing import Optional, Callable
 from abc import ABC, abstractmethod
 
 import backend
@@ -13,15 +13,30 @@ from backend.room import Room
 from ui.utils import get_image
 
 
-class MenuOpener(ttk.Menubutton):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.config(image=get_image('menu_burger_b'))
+class Widgets:
+    """Defines factory methods for generic widgets"""
+    @staticmethod
+    def room_name_input(parent, room_name_var) -> ttk.Labelframe:
+        frame = ttk.Labelframe(parent, text='Room name:')
+        room_name_entry = ttk.Entry(frame, textvariable=room_name_var)
+        room_name_entry.pack()
+        return frame
 
-        self.menu = tk.Menu(self, tearoff=0)
-        self.config(menu=self.menu)
-        self.menu.add_command(label='Rooms', command=RoomsMenuWindow)
-        self.menu.add_command(label='Lights', command=LightsMenuWindow)
+    @staticmethod
+    def room_type_input(parent, room_type_var) -> ttk.Labelframe:
+        frame = ttk.Labelframe(parent, text='Room type:')
+        room_type_selector = ttk.OptionMenu(
+            frame, room_type_var, Room.room_types[0], *Room.room_types
+        )
+        room_type_selector.pack()
+        return frame
+
+    @staticmethod
+    def submit_button(parent, command: Callable) -> ttk.Button:
+        submit_button = ttk.Button(
+            parent, text='Submit', command=command
+        )
+        return submit_button
 
 
 class MenuWindow(tk.Toplevel, ABC):
@@ -37,64 +52,92 @@ class MenuWindow(tk.Toplevel, ABC):
         pass
 
 
+class MenuOpener(ttk.Menubutton):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.config(image=get_image('menu_burger_b'))
+        self.config(menu=self._build_menu())
+
+    def _build_menu(self) -> tk.Menu:
+        menu = tk.Menu(self, tearoff=0)
+        menu.add_command(label='Rooms', command=RoomsMenuWindow)
+        menu.add_command(label='Lights', command=LightsMenuWindow)
+        return menu
+
+
 class RoomsMenuWindow(MenuWindow):
-    """Toplevel windows that contains settings dialogs to control Rooms"""
+    """Toplevel window that contains settings dialogs to edit or add rooms"""
     def __init__(self):
         super().__init__('Rooms')
         self._build_tabs()
-
-    def _build_tabs(self):
-        for room in self.home.rooms:
-            self.tabs.add(RoomSettingsTab(self), text=room.name)
-        self.tabs.add(CreateRoomTab(self), text='+Add Room')
-
         self.tabs.pack()
 
+    def _build_tabs(self):
+        self.tabs.add(self.RoomSettingsTab(self), text='Edit Rooms')
+        self.tabs.add(self.CreateRoomTab(self), text='+Add Room')
 
-class RoomSettingsTab(ttk.Frame):
-    """Frame that contains settings dialogs for a room"""
-    def __init__(self, parent):
-        super().__init__(parent)
+    class CreateRoomTab(ttk.Frame):
+        """Dialog to enter a name and select a type for a new room"""
+        def __init__(self, parent):
+            super().__init__(parent)
 
+            # define user changeable variables
+            self.room_name = tk.StringVar()
+            self.room_type = tk.StringVar()
 
-class CreateRoomTab(ttk.Frame):
-    """Dialog to enter a name and select a type for a new room"""
-    def __init__(self, parent):
-        super().__init__(parent)
+            self.content_frame = ttk.Frame(self)
+            self._build_content()
+            self.content_frame.pack(side='top', padx=50)
 
-        self.room_name = tk.StringVar()
-        self.room_type = tk.StringVar()
+            submit_button = Widgets.submit_button(self, self._submit)
+            submit_button.pack(side='bottom', anchor='se')
 
-        # start building content
-        self.form_content = ttk.Frame(self)
+        def _build_content(self):
+            name_input = Widgets.room_name_input(
+                self.content_frame, self.room_name
+            )
+            name_input.pack(side='top', anchor='w')
 
-        # build room name input
-        self.name_frame = ttk.Labelframe(self.form_content, text='Room name:')
-        ttk.Entry(
-            self.name_frame, textvariable=self.room_name
-        ).pack()
-        self.name_frame.pack(side='top', anchor='w')
+            type_input = Widgets.room_type_input(
+                self.content_frame, self.room_type
+            )
+            type_input.pack(side='top', anchor='w')
 
-        # build type_name input
-        self.type_frame = ttk.Labelframe(self.form_content, text='Room type:')
-        ttk.OptionMenu(
-            self.type_frame, self.room_type, Room.room_types[0], *Room.room_types
-        ).pack()
-        self.type_frame.pack(side='top', anchor='w')
+        def _submit(self):
+            name, type_ = self.room_name.get(), self.room_type.get()
+            if name.isalnum():
+                ui.events.publish('add_room', Room(name, type_))
 
-        self.form_content.pack(side='top', padx=50)
+    class RoomSettingsTab(ttk.Frame):
+        """Frame that contains settings dialogs for rooms in the home."""
+        def __init__(self, parent):
+            super().__init__(parent)
 
-        # build submit button
-        self.submit_button = ttk.Button(
-            self, text='Submit', command=self._submit
-        )
-        self.submit_button.pack(side='bottom', anchor='se')
+            # define user changeable variables
+            self.selected_room: Optional[Room] = None
+            self.room_name = tk.StringVar()
+            self.room_type = tk.StringVar()
 
-    def _submit(self):
-        name, type_ = self.room_name.get(), self.room_type.get()
-        if name.isalnum():
-            new_room: Room = Room(name, type_)
-            ui.events.publish('add_room', new_room)
+            self.content_frame = ttk.Frame(self)
+            self._build_content()
+            self.content_frame.pack()
+
+            submit_button = Widgets.submit_button(self, self._submit)
+            submit_button.pack(side='bottom', anchor='se')
+
+        def _build_content(self):
+            name_input = Widgets.room_name_input(
+                self.content_frame, self.room_name
+            )
+            name_input.pack(side='top', anchor='w')
+
+            type_input = Widgets.room_type_input(
+                self.content_frame, self.room_type
+            )
+            type_input.pack(side='top', anchor='w')
+
+        def _submit(self):
+            pass
 
 
 class LightsMenuWindow(MenuWindow):
