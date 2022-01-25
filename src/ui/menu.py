@@ -6,11 +6,11 @@ from tkinter import ttk
 from typing import Optional, Callable
 from abc import ABC, abstractmethod
 
-import backend
-import ui
-from backend.home import Home
-from backend.room import Room
-from ui.utils import get_image
+from src import ui
+from src.utils.observer import Event
+from src.ui.utils import get_image
+from src.backend.room import Room
+from src.backend.home import Home
 
 
 class Widgets:
@@ -103,10 +103,13 @@ class RoomsMenuWindow(MenuWindow):
             )
             type_input.pack(side='top', anchor='w')
 
-        def _submit(self):
-            name, type_ = self.room_name.get(), self.room_type.get()
-            if name.isalnum():
-                ui.events.publish('add_room', Room(name, type_))
+    def _submit(self):
+        room_name = self.room_name.get()
+        room_type = self.room_type.get()
+        if not room_name.isalnum():
+            return
+        new_room = Room(room_name, room_type)
+        ui.events.publish(Event.AddRoom, new_room)
 
     class RoomSettingsTab(ttk.Frame):
         """Frame that contains settings dialogs for rooms in the home."""
