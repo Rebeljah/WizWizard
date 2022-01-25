@@ -2,11 +2,11 @@ import os
 from functools import partial
 from pywizlight.discovery import discover_lights
 
-import backend
-import ui
-from backend import utils
-from backend.room import Room, UnassignedRoom
-from backend.light import Light
+from src.utils.observer import Event
+from src import ui, backend
+from src.backend import utils
+from src.backend.room import Room, UnassignedRoom
+from src.backend.light import Light
 
 
 from typing import Iterator, Optional
@@ -14,6 +14,7 @@ RoomId = MAC = str
 
 
 class Home:
+    active_home = None
     """
     Represents the root node of the home tree. The Home contain rooms, and rooms
     contains lights.
@@ -23,8 +24,7 @@ class Home:
         self.name = home_name
         self.rooms = []
 
-        backend.active_home = self
-        ui.events.subscribe(ui.AddRoom, partial(self.add_room, save=True))
+        ui.events.subscribe(Event.AddRoom, partial(self.add_room, save=True))
 
     @property
     def id(self) -> str:
@@ -50,7 +50,7 @@ class Home:
         self.rooms.append(room)
         room.home = self
 
-        backend.events.publish(backend.HomeAddRoom(room=room))
+        backend.events.publish(Event.AddRoom, room)
         if save:
             self.save_to_json()
 
@@ -58,7 +58,7 @@ class Home:
         """Remove the room given room"""
         self.rooms.remove(room)
 
-        backend.events.publish(backend.HomeRemoveRoom(room=room))
+        backend.events.publish(Event.RemoveRoom, room)
         if save:
             self.save_to_json()
 
@@ -107,14 +107,14 @@ class Home:
             ]
         }
 
-        filepath = os.path.join('data', 'homes', f"{self.id}.json")
+        filepath = os.path.join('homes', f"{self.id}.json")
         utils.save_dict_json(data, filepath)
 
     @classmethod
     def from_save(cls, home_uid: str):
         """Load then parse home_model data from JSON and return a Home instance"""
 
-        filepath = os.path.join('data', 'homes', f"{home_uid}.json")
+        filepath = os.path.join('homes', f"{home_uid}.json")
         home_data = utils.load_dict_json(filepath)
 
         # create Home
@@ -133,4 +133,5 @@ class Home:
                 light = Light(light_data['name'], light_data['mac'])
                 room.add_light(light)
 
+        cls.active_home = home
         return home

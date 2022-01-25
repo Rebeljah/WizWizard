@@ -3,14 +3,13 @@
 import tkinter as tk
 from tkinter import ttk
 
-from typing import Optional, Type
 from abc import ABC, abstractmethod
 
-import backend
-import ui
-from backend.home import Home
-from backend.room import Room
-from ui.utils import get_image
+from src import ui
+from src.utils.observer import Event
+from src.ui.utils import get_image
+from src.backend.room import Room
+from src.backend.home import Home
 
 
 class MenuOpener(ttk.Menubutton):
@@ -29,7 +28,6 @@ class MenuWindow(tk.Toplevel, ABC):
     def __init__(self, title):
         super().__init__()
         self.title(title)
-        self.home: Optional[Home] = backend.active_home
         self.tabs = ttk.Notebook(self)
 
     @abstractmethod
@@ -44,7 +42,7 @@ class RoomsMenuWindow(MenuWindow):
         self._build_tabs()
 
     def _build_tabs(self):
-        for room in self.home.rooms:
+        for room in Home.active_home.rooms:
             self.tabs.add(RoomSettingsTab(self), text=room.name)
         self.tabs.add(CreateRoomTab(self), text='+Add Room')
 
@@ -91,10 +89,12 @@ class CreateRoomTab(ttk.Frame):
         self.submit_button.pack(side='bottom', anchor='se')
 
     def _submit(self):
-        name, type_ = self.room_name.get(), self.room_type.get()
-        if name.isalnum():
-            new_room: Room = Room(name, type_)
-            ui.events.publish(ui.AddRoom(room=new_room))
+        room_name = self.room_name.get()
+        room_type = self.room_type.get()
+        if not room_name.isalnum():
+            return
+        new_room = Room(room_name, room_type)
+        ui.events.publish(Event.AddRoom, new_room)
 
 
 class LightsMenuWindow(MenuWindow):

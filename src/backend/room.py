@@ -1,6 +1,6 @@
-
-import backend
-from backend import utils
+from src import backend
+from src.backend import utils
+from src.utils.observer import Event
 
 from typing import Optional as Opt
 
@@ -36,14 +36,12 @@ class Room:
             light.room.remove_light(light)
         light.room = self
         self.lights.add(light)
-
-        backend.events.publish(backend.AddLight(light=light))
+        backend.events.publish(Event.AddLight, light)
 
     def remove_light(self, light):
         light.room = None
         self.lights.remove(light)
-
-        backend.events.publish(backend.RemoveLight(light=light))
+        backend.events.publish(Event.RemoveLight, light)
 
     def clear_lights(self):
         for light in self.lights:

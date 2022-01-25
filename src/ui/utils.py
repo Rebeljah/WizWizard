@@ -5,7 +5,7 @@ import os
 
 # full_filename maps to PhotoImage
 IMG_CACHE: dict[str, PhotoImage] = {}
-IMG_DIR = os.path.join('.', 'data', 'img')
+IMG_DIR = 'img'
 
 
 def get_image(partial_filename) -> PhotoImage:

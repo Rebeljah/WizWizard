@@ -2,10 +2,8 @@
 import tkinter as tk
 import asyncio
 
-from backend.home import Home
-from ui.rooms import RoomTabs
-from ui.controls import ControlPanel
-from ui.menu import MenuOpener
+from src.backend import home
+from src.ui import menu, rooms, controls
 
 
 class TkRoot(tk.Tk):
@@ -15,12 +13,9 @@ class TkRoot(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.close)
 
         # build
-        MenuOpener(self).pack(side='top', anchor='ne')
-        RoomTabs(self).pack(fill='both', expand=True)
-        ControlPanel(self).pack(fill='both', side='bottom')
-
-        # load home
-        self.home_model = Home.from_save('0000000')
+        menu.MenuOpener(self).pack(side='top', anchor='ne')
+        rooms.RoomTabs(self).pack(fill='both', expand=True)
+        controls.ControlPanel(self).pack(fill='both', side='bottom')
 
     async def app_mainloop(self):
         while True:

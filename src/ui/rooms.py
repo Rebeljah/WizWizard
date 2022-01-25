@@ -2,10 +2,10 @@
 
 from tkinter import ttk
 
-import backend
-from backend.room import Room, UnassignedRoom
-import ui
-from ui import utils
+from src import ui, backend
+from src.ui import utils
+from src.utils.observer import Event
+from src.backend.room import Room, UnassignedRoom
 
 
 class RoomTabs(ttk.Notebook):
@@ -13,8 +13,8 @@ class RoomTabs(ttk.Notebook):
     def __init__(self, parent):
         super().__init__(parent)
         self.bind('<<NotebookTabChanged>>', self._on_change_tab)
-        backend.events.subscribe(backend.HomeAddRoom, self.add_room_tab)
-        backend.events.subscribe(backend.HomeRemoveRoom, self.remove_room_tab)
+        backend.events.subscribe(Event.AddRoom, self.add_room_tab)
+        backend.events.subscribe(Event.RemoveRoom, self.remove_room_tab)
 
         self.selected_lights = set()
         self.new_lights_tab = None
@@ -25,7 +25,7 @@ class RoomTabs(ttk.Notebook):
 
     def set_selected_lights(self, lights):
         self.selected_lights = lights
-        ui.events.publish(ui.SetSelectedLights(lights=lights))
+        ui.events.publish(Event.SetControlledLights, lights)
 
     def add_room_tab(self, room):
         tab = RoomTab(self, room)
@@ -51,7 +51,7 @@ class RoomTab(ttk.Frame):
     """Tab that holds light buttons"""
     def __init__(self, parent, room):
         super().__init__(parent)
-        backend.events.subscribe(backend.AddLight, self.add_light_button)
+        backend.events.subscribe(Event.AddLight, self.add_light_button)
         self.parent = parent
         self.room = room
 
@@ -83,7 +83,7 @@ class LightSelectButton(ttk.Button):
     """Button used to select a light."""
     def __init__(self, parent, room_tab, light, **kwargs):
         super().__init__(parent, **kwargs)
-        backend.events.subscribe(backend.LightSetWizlight, self._update_light)
+        backend.events.subscribe(Event.ConnectLight, self._update_light)
 
         self.tab = room_tab
         self.light = light
