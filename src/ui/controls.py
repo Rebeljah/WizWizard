@@ -3,11 +3,11 @@
 from tkinter import ttk
 from typing import Type
 
+from src import ui
 from src.utils.observer import Event
 from src.backend.light_commands import (
     command_lights, Lightswitch, SetBrightness, SetLightTemp
 )
-from src import ui
 
 
 class ControlPanel(ttk.Labelframe):
@@ -38,7 +38,7 @@ class ControlPanel(ttk.Labelframe):
     def set_controlled_lights(self, lights: set):
         self.controlled_lights = lights
 
-    def command_lights(self, command: Type, **kwargs):
+    def command_lights(self, command, **kwargs):
         command_lights(self.controlled_lights, command, **kwargs)
 
 

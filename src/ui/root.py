@@ -2,7 +2,6 @@
 import tkinter as tk
 import asyncio
 
-from src.backend import home
 from src.ui import menu, rooms, controls
 
 
