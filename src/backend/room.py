@@ -25,6 +25,9 @@ class Room:
         else:
             self._id = utils.create_uid()
 
+    def __repr__(self):
+        return self.name
+
     @property
     def id(self) -> str:
         """Read-only alias of self._id"""

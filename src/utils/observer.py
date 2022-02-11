@@ -7,6 +7,7 @@ from typing import Callable
 class Event(Enum):
     AddRoom = auto()
     RemoveRoom = auto()
+    EditRoom = auto()
     AddLight = auto()
     RemoveLight = auto()
     ConnectLight = auto()
