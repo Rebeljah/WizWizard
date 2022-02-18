@@ -5,21 +5,22 @@ from tkinter import ttk
 from src import ui, backend
 from src.ui import utils
 from src.utils.observer import Event
-from src.backend.room import Room, UnassignedRoom
+from src.backend.room import Room, TemporaryRoom
 
 
 class RoomTabs(ttk.Notebook):
     """Notebook of tabs, each containing light buttons for a room in the Home"""
     def __init__(self, parent):
         super().__init__(parent)
-        self.bind('<<NotebookTabChanged>>', self._on_change_tab)
-        backend.events.subscribe(Event.AddRoom, self.add_room_tab)
-        backend.events.subscribe(Event.RemoveRoom, self.remove_room_tab)
+        self.bind('<<NotebookTabChanged>>', lambda _: self._on_change_tab())
+        backend.events.subscribe(Event.AddedRoom, self.add_room_tab)
+        backend.events.subscribe(Event.RemovedRoom, self.remove_room_tab)
+        ui.events.subscribe(Event.EditedRoom, lambda _: self.update())
 
         self.selected_lights = set()
         self.new_lights_tab = None
 
-    def _on_change_tab(self, event):
+    def _on_change_tab(self):
         curr_tab = self.nametowidget(self.select())
         self.set_selected_lights(curr_tab.selected_lights)
 
@@ -30,7 +31,7 @@ class RoomTabs(ttk.Notebook):
     def add_room_tab(self, room):
         tab = RoomTab(self, room)
         text = room.name
-        if isinstance(room, UnassignedRoom):
+        if isinstance(room, TemporaryRoom):
             self.add(tab, text=text)
             self.new_lights_tab = tab
         elif self.new_lights_tab in self.winfo_children():
@@ -46,12 +47,18 @@ class RoomTabs(ttk.Notebook):
         if self.selected_lights.intersection(room.lights):
             self.selected_lights = set()
 
+    def update(self):
+        """change tabs titles"""
+        for tab in self.tabs():
+            room = self.nametowidget(tab).room
+            self.tab(tab, text=room.name)
+
 
 class RoomTab(ttk.Frame):
     """Tab that holds light buttons"""
     def __init__(self, parent, room):
         super().__init__(parent)
-        backend.events.subscribe(Event.AddLight, self.add_light_button)
+        backend.events.subscribe(Event.AddedLight, self.add_light_button)
         self.parent = parent
         self.room = room
 
@@ -83,7 +90,7 @@ class LightSelectButton(ttk.Button):
     """Button used to select a light."""
     def __init__(self, parent, room_tab, light, **kwargs):
         super().__init__(parent, **kwargs)
-        backend.events.subscribe(Event.ConnectLight, self._update_light)
+        backend.events.subscribe(Event.UpdatedLight, self._update_light)
 
         self.tab = room_tab
         self.light = light
@@ -111,7 +118,7 @@ class LightSelectButton(ttk.Button):
             return
 
         # check if wizlight is present / on
-        if not light.wizlight:
+        if not light.connected:
             self.image_state = 'alert'
         elif light.is_on:
             self.image_state = 'on'

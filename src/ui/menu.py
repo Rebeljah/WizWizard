@@ -40,13 +40,9 @@ class Widgets:
 
 
 class MenuWindow(tk.Toplevel, ABC):
-    current_window = None
-
     """Base class for menu modal windows"""
     def __init__(self, title):
         super().__init__()
-        MenuWindow.current_window = self
-
         self.title(title)
         self.home: Home = Home.active_home
         self.tabs = ttk.Notebook(self)
@@ -54,6 +50,11 @@ class MenuWindow(tk.Toplevel, ABC):
     @abstractmethod
     def _build_tabs(self):
         pass
+
+
+class MenuTab(ttk.Frame):
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent, **kwargs)
 
 
 class MenuOpener(ttk.Menubutton):
@@ -80,7 +81,7 @@ class RoomsMenuWindow(MenuWindow):
         self.tabs.add(self.EditRoomsTab(self), text='Edit Rooms')
         self.tabs.add(self.CreateRoomTab(self), text='+Add Room')
 
-    class CreateRoomTab(ttk.Frame):
+    class CreateRoomTab(MenuTab):
         """Dialog to enter a name and select a type for a new room"""
         def __init__(self, parent):
             super().__init__(parent)
@@ -108,19 +109,22 @@ class RoomsMenuWindow(MenuWindow):
         def _submit(self):
             room_name = self.room_name.get()
             room_type = self.room_type.get()
-            if not room_name.isalnum():
+
+            if not room_name.replace(' ', '').isalnum():
                 return
-            ui.events.publish(Event.AddRoom, Room(room_name, room_type))
 
-            MenuWindow.current_window.destroy()
+            ui.events.publish(Event.AddedRoom, Room(room_name, room_type))
 
-    class EditRoomsTab(ttk.Frame):
+            # close the menu
+            self.nametowidget(self.winfo_parent()).destroy()
+
+    class EditRoomsTab(MenuTab):
         """Frame that contains settings dialogs for rooms in the home."""
         def __init__(self, parent):
             super().__init__(parent)
 
             # define user changeable variables
-            self.selected_room = tk.Variable()
+            self.selected_room_name = tk.StringVar()
             self.room_name = tk.StringVar()
             self.room_type = tk.StringVar()
 
@@ -134,7 +138,7 @@ class RoomsMenuWindow(MenuWindow):
         def _build_content(self):
             # build a dropdown that lists the rooms available.
             room_selector = Widgets.dropdown_input(
-                self, 'Room', Home.active_home.saved_rooms, self.selected_room
+                self, 'Room', Room.saved_rooms(), self.selected_room_name
             )
             room_selector.pack(side='top')
 
@@ -147,8 +151,30 @@ class RoomsMenuWindow(MenuWindow):
             type_input.pack(side='top')
 
         def _submit(self):
-            ui.events.publish(Event.EditRoom, self.selected_room.get())
-            MenuWindow.current_window.destroy()
+            selected_room_name = self.selected_room_name.get()
+            room_type = self.room_type.get()
+            room_name = self.room_name.get()
+            edited = False
+
+            room = Room.from_name(selected_room_name)
+            if room is None:
+                return  # user did not select a room
+
+            # edit the room with input verification
+            if room_type in Room.room_types:
+                room.type = room_type
+                edited = True
+            if room_name.replace(' ', '').isalnum():
+                room.name = room_name
+                edited = True
+
+            if not edited:
+                return  # user made no changes
+
+            ui.events.publish(Event.EditedRoom, room)
+            print(room, room.name, room.type)
+            # close the menu
+            self.nametowidget(self.winfo_parent()).destroy()
 
 
 class LightsMenuWindow(MenuWindow):

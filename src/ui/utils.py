@@ -1,11 +1,12 @@
 from PIL import Image, ImageTk
 from tkinter import PhotoImage
 import os
+from pathlib import Path
 
 
 # full_filename maps to PhotoImage
 IMG_CACHE: dict[str, PhotoImage] = {}
-IMG_DIR = 'img'
+IMG_DIR = Path('data') / 'img'
 
 
 def get_image(partial_filename) -> PhotoImage:
@@ -16,7 +17,7 @@ def get_image(partial_filename) -> PhotoImage:
         # use the query_fn to match to a full filename in the img folder
         for full_filename in os.listdir(IMG_DIR):
             if partial_filename in full_filename:
-                return os.path.join(IMG_DIR, full_filename)
+                return Path(IMG_DIR) / full_filename
         else:
             raise FileNotFoundError(f'Could find image matching "{partial_filename}"')
 

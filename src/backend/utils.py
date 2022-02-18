@@ -17,7 +17,7 @@ def save_dict_json(data: dict, filepath, indent: int = 4) -> None:
         json.dump(data, outfile, indent=indent)
 
 
-def load_dict_json(filepath: str) -> dict:
+def load_dict_json(filepath) -> dict:
     """Load json data from the filepath"""
     with open(filepath) as infile:
         return json.load(infile)

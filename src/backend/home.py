@@ -1,11 +1,12 @@
 import os
+from pathlib import Path
 from functools import partial
 from pywizlight.discovery import discover_lights
 
 from src.utils.observer import Event
 from src import ui, backend
 from src.backend import utils
-from src.backend.room import Room, UnassignedRoom
+from src.backend.room import Room, TemporaryRoom
 from src.backend.light import Light
 
 
@@ -24,19 +25,13 @@ class Home:
         self.name = home_name
         self.rooms = []
 
-        ui.events.subscribe(Event.AddRoom, partial(self.add_room, save=True))
+        ui.events.subscribe(Event.AddedRoom, partial(self.add_room, save=True))
+        ui.events.subscribe(Event.EditedRoom, lambda _: self.save_to_json())
 
     @property
     def id(self) -> str:
         """Read-only alias of self._id"""
         return self._id
-
-    @property
-    def saved_rooms(self) -> Iterator[Room]:
-        """Yield rooms that should be saved to the data folder"""
-        for room in self.rooms:
-            if not isinstance(room, UnassignedRoom):
-                yield room
 
     @property
     def lights(self) -> Iterator[Light]:
@@ -50,7 +45,7 @@ class Home:
         self.rooms.append(room)
         room.home = self
 
-        backend.events.publish(Event.AddRoom, room)
+        backend.events.publish(Event.AddedRoom, room)
         if save:
             self.save_to_json()
 
@@ -58,7 +53,7 @@ class Home:
         """Remove the room given room"""
         self.rooms.remove(room)
 
-        backend.events.publish(Event.RemoveRoom, room)
+        backend.events.publish(Event.RemovedRoom, room)
         if save:
             self.save_to_json()
 
@@ -78,7 +73,7 @@ class Home:
             return
 
         # Re-instantiate the home's new lights room
-        new_lights_room = UnassignedRoom()
+        new_lights_room = TemporaryRoom()
         self.add_room(new_lights_room)
 
         # add any remaining wizlights to unassigned room
@@ -103,18 +98,18 @@ class Home:
                             "mac": light.mac
                         } for light in room.lights
                     ]
-                } for room in self.saved_rooms
+                } for room in Room.saved_rooms()
             ]
         }
 
-        filepath = os.path.join('homes', f"{self.id}.json")
+        filepath = Path('data') / 'homes' / f'{self.id}.json'
         utils.save_dict_json(data, filepath)
 
     @classmethod
     def from_save(cls, home_uid: str):
         """Load then parse home_model data from JSON and return a Home instance"""
 
-        filepath = os.path.join('homes', f"{home_uid}.json")
+        filepath = Path('data') / 'homes' / f'{home_uid}.json'
         home_data = utils.load_dict_json(filepath)
 
         # create Home

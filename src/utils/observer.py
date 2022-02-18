@@ -5,12 +5,12 @@ from typing import Callable
 
 
 class Event(Enum):
-    AddRoom = auto()
-    RemoveRoom = auto()
-    EditRoom = auto()
-    AddLight = auto()
-    RemoveLight = auto()
-    ConnectLight = auto()
+    AddedRoom = auto()
+    RemovedRoom = auto()
+    EditedRoom = auto()
+    AddedLight = auto()
+    RemovedLight = auto()
+    UpdatedLight = auto()
     SetControlledLights = auto()
 
 
