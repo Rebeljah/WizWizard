@@ -35,7 +35,7 @@ class RoomTabs(ttk.Notebook):
             self.add(tab, text=text)
             self.new_lights_tab = tab
         elif self.new_lights_tab in self.winfo_children():
-            self.insert(1, tab, text=text)
+            self.insert(0, tab, text=text)
         else:
             self.add(tab, text=text)
 
