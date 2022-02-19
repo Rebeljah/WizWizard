@@ -40,7 +40,6 @@ class RoomTabs(ttk.Notebook):
             self.add(tab, text=text)
 
     def remove_room_tab(self, room: Room):
-        # remove tab
         self.forget(room.name)
 
         # deselect lights if room lights are selected

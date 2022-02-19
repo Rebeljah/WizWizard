@@ -12,7 +12,6 @@ from typing import Optional
 
 
 class Light:
-    # TODO add light type names as a class var like the room class
     """Class to represent a light object that controls a real bulb"""
     def __init__(self, name: str, mac: str, wizlight: Optional[Wizlight] = None):
         # parent
