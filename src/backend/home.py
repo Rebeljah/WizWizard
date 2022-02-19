@@ -13,13 +13,16 @@ from src.backend.light import Light
 from typing import Iterator, Optional
 RoomId = MAC = str
 
+HOME_DATA_PATH = Path('data') / 'homes'
+
 
 class Home:
-    active_home = None
     """
     Represents the root node of the home tree. The Home contain rooms, and rooms
     contains lights.
     """
+    active_home = None
+
     def __init__(self, home_name: str, home_id: Optional[str] = ''):
         self._id = home_id or utils.create_uid()
         self.name = home_name
@@ -27,6 +30,14 @@ class Home:
 
         ui.events.subscribe(Event.AddedRoom, partial(self.add_room, save=True))
         ui.events.subscribe(Event.EditedRoom, lambda _: self.save_to_json())
+        self.save_to_json()
+
+        # this lets the app reload the home on restart.
+        self._set_as_last_loaded()
+
+    def _set_as_last_loaded(self):
+        with open(HOME_DATA_PATH / 'last_loaded.txt', 'w') as f:
+            f.write(self.id)
 
     @property
     def id(self) -> str:
@@ -65,8 +76,8 @@ class Home:
 
         # pop and attach wizlights to lights with matching MACs
         for light in self.lights:
-            if b := found_lights.pop(light.mac, False):
-                await light.set_wizlight(b)
+            if wiz_l := found_lights.pop(light.mac, False):
+                await light.set_wizlight(wiz_l)
 
         # Check if there are any unassigned wizlights left
         if not (remaining := found_lights.values()):
@@ -102,14 +113,14 @@ class Home:
             ]
         }
 
-        filepath = Path('data') / 'homes' / f'{self.id}.json'
+        filepath = HOME_DATA_PATH / f'{self.id}.json'
         utils.save_dict_json(data, filepath)
 
     @classmethod
     def from_save(cls, home_uid: str):
         """Load then parse home_model data from JSON and return a Home instance"""
 
-        filepath = Path('data') / 'homes' / f'{home_uid}.json'
+        filepath = HOME_DATA_PATH / f'{home_uid}.json'
         home_data = utils.load_dict_json(filepath)
 
         # create Home
@@ -130,3 +141,17 @@ class Home:
 
         cls.active_home = home
         return home
+
+    @classmethod
+    def get_last_loaded_home(cls):
+        save_path = HOME_DATA_PATH / 'last_loaded.txt'
+
+        # check if saved data for last home exists
+        if 'last_loaded.txt' not in os.listdir(HOME_DATA_PATH):
+            with open(save_path, 'w') as _:
+                return None  # no save
+
+        with open(save_path) as f:
+            home_uid = f.read()
+            if home_uid:
+                return Home.from_save(home_uid)

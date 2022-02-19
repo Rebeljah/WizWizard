@@ -172,7 +172,6 @@ class RoomsMenuWindow(MenuWindow):
                 return  # user made no changes
 
             ui.events.publish(Event.EditedRoom, room)
-            print(room, room.name, room.type)
             # close the menu
             self.nametowidget(self.winfo_parent()).destroy()
 

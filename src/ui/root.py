@@ -21,7 +21,7 @@ class TkRoot(tk.Tk):
     async def app_mainloop(self):
         while True:
             self.update()
-            await asyncio.sleep(1/60)
+            await asyncio.sleep(1/10)
 
     def close(self):
         asyncio.get_running_loop().stop()

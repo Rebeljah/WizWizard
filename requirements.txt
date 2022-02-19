@@ -1,2 +1,2 @@
-pywizlight~=0.4.7
-Pillow~=8.4.0
+Pillow~=9.0.1
+pywizlight~=0.5.10
