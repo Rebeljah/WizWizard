@@ -30,7 +30,6 @@ class Home:
 
         ui.events.subscribe(Event.AddedRoom, partial(self.add_room, save=True))
         ui.events.subscribe(Event.EditedRoom, lambda _: self.save_to_json())
-        self.save_to_json()
 
         # this lets the app reload the home on restart.
         self._set_as_last_loaded()
@@ -143,7 +142,7 @@ class Home:
         return home
 
     @classmethod
-    def get_last_loaded_home(cls):
+    def get_last_loaded(cls):
         save_path = HOME_DATA_PATH / 'last_loaded.txt'
 
         # check if saved data for last home exists
