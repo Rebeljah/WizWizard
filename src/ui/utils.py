@@ -3,8 +3,10 @@ from tkinter import PhotoImage
 import os
 from pathlib import Path
 
-IMG_DIR = Path('data') / 'img'
+
+# full_filename maps to PhotoImage
 IMG_CACHE: dict[str, PhotoImage] = {}
+IMG_DIR = Path('data') / 'img'
 
 
 def get_image(partial_filename) -> PhotoImage:
