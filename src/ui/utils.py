@@ -2,9 +2,9 @@ from PIL import Image, ImageTk
 from tkinter import PhotoImage
 import os
 from pathlib import Path
-from functools import cache
 
 IMG_DIR = Path('data') / 'img'
+IMG_CACHE: dict[str, PhotoImage] = {}
 
 
 def get_image(partial_filename) -> PhotoImage:
@@ -19,9 +19,13 @@ def get_image(partial_filename) -> PhotoImage:
         else:
             raise FileNotFoundError(f'Could find image matching "{partial_filename}"')
 
-    @cache
     def load_image(file_path):
-        img = ImageTk.PhotoImage(Image.open(file_path))
-        return img
+        # try to load from cache dict or load from disk
+        if img := IMG_CACHE.get(file_path):
+            return img
+        else:
+            img = ImageTk.PhotoImage(Image.open(file_path))
+            IMG_CACHE[file_path] = img
+            return img
 
     return load_image(get_full_filepath())
