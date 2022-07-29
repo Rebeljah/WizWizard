@@ -1,20 +1,23 @@
 import asyncio
-from tkinter.simpledialog import askstring
 
 from src.backend import home
 from src.ui import root
 
 
-if __name__ == '__main__':
-    loop = asyncio.new_event_loop()
+def main():
+    current_home = home.Home.get_last_loaded()
 
+    if not current_home:
+        return
+
+    loop = asyncio.new_event_loop()
     app = root.TkRoot()
     loop.create_task(app.app_mainloop())
 
-    if (loaded_home := home.Home.get_last_loaded()) is None:
-        loaded_home = home.Home(askstring('New home', 'Home name'))
-        loaded_home.save_to_json()
-
-    loop.create_task(loaded_home.find_lights())
+    loop.create_task(current_home.find_lights())
 
     loop.run_forever()
+
+
+if __name__ == '__main__':
+    main()

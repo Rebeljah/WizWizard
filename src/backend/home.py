@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from functools import partial
+from tkinter.simpledialog import askstring
 from pywizlight.discovery import discover_lights
 
 from src.utils.observer import Event
@@ -145,12 +146,23 @@ class Home:
     def get_last_loaded(cls):
         save_path = HOME_DATA_PATH / 'last_loaded.txt'
 
-        # check if saved data for last home exists
-        if 'last_loaded.txt' not in os.listdir(HOME_DATA_PATH):
-            with open(save_path, 'w') as _:
-                return None  # no save
-
-        with open(save_path) as f:
+        with open(save_path, 'a+') as f:
+            f.seek(0)
             home_uid = f.read()
-            if home_uid:
-                return Home.from_save(home_uid)
+
+        if home_uid:
+            return Home.from_save(home_uid)
+        else:
+            return Home.make_new_home()
+    
+    @classmethod
+    def make_new_home(cls):
+        new_home_name = askstring('New home', 'Home name')
+        
+        if new_home_name == '':
+            return
+
+        new_home = Home(new_home_name)
+        new_home.save_to_json()
+        
+        return new_home
