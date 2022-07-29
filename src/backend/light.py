@@ -6,7 +6,7 @@ from pywizlight.bulb import wizlight as Wizlight
 from pywizlight.bulb import PilotBuilder
 
 from . import events
-from src.utils.observer import Event
+from src.observer import Event
 
 from typing import Optional
 

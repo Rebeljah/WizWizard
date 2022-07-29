@@ -4,7 +4,7 @@ from functools import partial
 from tkinter.simpledialog import askstring
 from pywizlight.discovery import discover_lights
 
-from src.utils.observer import Event
+from src.observer import Event
 from src import ui, backend
 from src.backend import utils
 from src.backend.room import Room, TemporaryRoom

@@ -7,7 +7,7 @@ from typing import Callable
 from abc import ABC, abstractmethod
 
 from src import ui
-from src.utils.observer import Event
+from src.observer import Event
 from src.ui.utils import get_image
 from src.backend.room import Room
 from src.backend.home import Home

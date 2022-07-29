@@ -3,7 +3,7 @@ import asyncio
 from pywizlight import PilotBuilder
 
 from src.backend.light import Light
-from src.utils.limiter import Limiter
+from src.limiter import Limiter
 
 from abc import ABC, abstractmethod
 from typing import Type, Iterable

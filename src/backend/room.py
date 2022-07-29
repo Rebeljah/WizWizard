@@ -1,6 +1,6 @@
 from src import backend
 from src.backend import utils
-from src.utils.observer import Event
+from src.observer import Event
 
 from typing import Optional, Union
 

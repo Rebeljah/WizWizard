@@ -4,7 +4,7 @@ from tkinter import ttk
 
 from src import ui, backend
 from src.ui import utils
-from src.utils.observer import Event
+from src.observer import Event
 from src.backend.room import Room, TemporaryRoom
 
 

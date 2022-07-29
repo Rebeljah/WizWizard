@@ -4,7 +4,7 @@ from tkinter import ttk
 from typing import Type
 
 from src import ui
-from src.utils.observer import Event
+from src.observer import Event
 from src.backend.light_commands import (
     command_lights, Lightswitch, SetBrightness, SetLightTemp
 )
