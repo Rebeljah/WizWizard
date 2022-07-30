@@ -6,7 +6,7 @@ from pathlib import Path
 
 # full_filename maps to PhotoImage
 IMG_CACHE: dict[str, PhotoImage] = {}
-IMG_DIR = Path('data') / 'img'
+IMG_DIR = Path(__file__).parent.parent / 'img'
 
 
 def get_image(partial_filename) -> PhotoImage:
