@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from functools import partial
 from tkinter.simpledialog import askstring
@@ -14,7 +13,7 @@ from src.backend.light import Light
 from typing import Iterator, Optional
 RoomId = MAC = str
 
-HOME_DATA_PATH = Path('data') / 'homes'
+HOME_DATA_PATH = Path(__file__).parent.parent.parent / 'data' / 'homes'
 
 
 class Home:

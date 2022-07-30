@@ -1,6 +1,6 @@
 
 import json
-import os
+from pathlib import Path
 import random
 import string
 
@@ -8,19 +8,17 @@ import string
 MAC = str
 
 
-def save_dict_json(data: dict, filepath, indent: int = 4) -> None:
+def save_dict_json(data: dict, path: Path, indent: int = 4) -> None:
     """Save dictionary as JSON to the the filepath"""
-    folder_path = os.path.join(*os.path.split(filepath)[:-1])
-    if not os.path.isdir(folder_path):
-        os.mkdir(folder_path)
-    with open(filepath, 'w') as outfile:
+    path.parent.mkdir(exist_ok=True)
+    with open(path, 'w') as outfile:
         json.dump(data, outfile, indent=indent)
 
 
-def load_dict_json(filepath) -> dict:
+def load_dict_json(path: Path) -> dict:
     """Load json data from the filepath"""
-    with open(filepath) as infile:
-        return json.load(infile)
+    with open(path) as f:
+        return json.load(f)
 
 
 def create_uid(length: int = 10) -> str:
